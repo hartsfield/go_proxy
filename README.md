@@ -6,3 +6,15 @@ will read the host name and direct the client to the appropriate port based on
 that hostname. 
 
 It can easily be modified for your websites. See the comments in `main.go`. 
+
+NOTE:
+
+This program runs on port `8080` for http connections and port `8443` for https.
+This is so you won't need to run it with administrator priviliges. To make this
+program work properly you should use the following command (for linux) to 
+redirect traffic from port `80` and `443` respectively:
+
+    sudo iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 8443
+    sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
+
+
