@@ -90,18 +90,40 @@ func entryPoint(w http.ResponseWriter, r *http.Request) {
 	notFound(w, r)
 }
 
+func secureRedirect(w http.ResponseWriter, r *http.Request) {
+	target := "https://" + r.Host + r.URL.Path
+	if len(r.URL.RawQuery) > 0 {
+		target += "?" + r.URL.RawQuery
+	}
+	http.Redirect(w, r, target, http.StatusTemporaryRedirect)
+}
+
 // check if the hostname is upgradeable to TLS. At this time only MysteryGift
 // is upgradeable because I've only generated certificates for it.
 func upgradeToTLS(w http.ResponseWriter, r *http.Request) {
-	if r.Host == "mysterygift.org" || r.Host == "telesoft.network" || r.Host == "tagmachine.telesoft.network" {
-		target := "https://" + r.Host + r.URL.Path
-		if len(r.URL.RawQuery) > 0 {
-			target += "?" + r.URL.RawQuery
-		}
-		http.Redirect(w, r, target, http.StatusTemporaryRedirect)
-	} else {
+	switch r.Host {
+	case "mysterygift.org":
+		secureRedirect(w, r)
+	case "telesoft.network":
+		secureRedirect(w, r)
+	case "tagmachine.telesoft.network":
+		secureRedirect(w, r)
+	case "tonedef.telesoft.network":
+		secureRedirect(w, r)
+	default:
 		entryPoint(w, r)
 	}
+
+	//	if r.Host == "mysterygift.org" || r.Host == "telesoft.network" || r.Host == "tagmachine.telesoft.network" {
+	//		target := "https://" + r.Host + r.URL.Path
+	//		if len(r.URL.RawQuery) > 0 {
+	//			target += "?" + r.URL.RawQuery
+	//		}
+	//		http.Redirect(w, r, target, http.StatusTemporaryRedirect)
+	//	} else {
+	//
+	//		entryPoint(w, r)
+	//	}
 }
 
 // If this user tries to visit a host that can't be found, we send a message
