@@ -100,6 +100,18 @@ func init() {
 	proxyMap["anglewood.telesoft.network"] =
 		&httputil.ReverseProxy{Director: directorAngle}
 
+	originBtstrmr, _ := url.Parse("http://localhost:5555/")
+	directorBtstrmr := func(req *http.Request) {
+		req.Header.Add("X-Forwarded-Host", req.Host)
+		req.Header.Add("X-Origin-Host", originBtstrmr.Host)
+		req.URL.Scheme = "http"
+		req.URL.Host = originBtstrmr.Host
+	}
+
+	// add to proxyMap
+	proxyMap["btstrmr.xyz"] =
+		&httputil.ReverseProxy{Director: directorBtstrmr}
+
 }
 
 func main() {
