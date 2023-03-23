@@ -124,6 +124,19 @@ func init() {
 	proxyMap["travellog.telesoft.network"] =
 		&httputil.ReverseProxy{Director: directorSpauth}
 
+	// btstrmr 2
+	originBt2, _ := url.Parse("http://localhost:6665/")
+	directorBt2 := func(req *http.Request) {
+		req.Header.Add("X-Forwarded-Host", req.Host)
+		req.Header.Add("X-Origin-Host", originBt2.Host)
+		req.URL.Scheme = "http"
+		req.URL.Host = originBt2.Host
+	}
+
+	// add to proxyMap
+	proxyMap["bt2.telesoft.network"] =
+		&httputil.ReverseProxy{Director: directorBt2}
+
 }
 
 func main() {
