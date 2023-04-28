@@ -125,7 +125,7 @@ func init() {
 		&httputil.ReverseProxy{Director: directorSpauth}
 
 	// btstrmr 2
-	originBt2, _ := url.Parse("http://localhost:6665/")
+	originBt2, _ := url.Parse("http://localhost:8666/")
 	directorBt2 := func(req *http.Request) {
 		req.Header.Add("X-Forwarded-Host", req.Host)
 		req.Header.Add("X-Origin-Host", originBt2.Host)
@@ -191,6 +191,8 @@ func upgradeToTLS(w http.ResponseWriter, r *http.Request) {
 	case "tonedef.telesoft.network":
 		secureEntryPoint(w, r)
 	case "tsconsulting.telesoft.network":
+		secureEntryPoint(w, r)
+	case "btstrmr.xyz":
 		secureEntryPoint(w, r)
 	default:
 		insecureEntryPoint(w, r)
