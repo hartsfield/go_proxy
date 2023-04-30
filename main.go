@@ -63,18 +63,17 @@ func init() {
 	proxyMap["tagmachine.xyz"] =
 		&httputil.ReverseProxy{Director: directorTagMachine}
 
-	///////// tonedef.TeleSoft.network running on port 9003
-	originToneDef, _ := url.Parse("http://localhost:9003/")
-	directorToneDef := func(req *http.Request) {
+	originStorefront, _ := url.Parse("http://localhost:8667/")
+	directorStorefront := func(req *http.Request) {
 		req.Header.Add("X-Forwarded-Host", req.Host)
-		req.Header.Add("X-Origin-Host", originToneDef.Host)
+		req.Header.Add("X-Origin-Host", originStorefront.Host)
 		req.URL.Scheme = "http"
-		req.URL.Host = originToneDef.Host
+		req.URL.Host = originStorefront.Host
 	}
 
 	// add to proxyMap
-	proxyMap["tonedef.telesoft.network"] =
-		&httputil.ReverseProxy{Director: directorToneDef}
+	proxyMap["storefront.telesoft.network"] =
+		&httputil.ReverseProxy{Director: directorStorefront}
 
 	originTSC, _ := url.Parse("http://localhost:9047/")
 	directorTSC := func(req *http.Request) {
@@ -188,7 +187,7 @@ func upgradeToTLS(w http.ResponseWriter, r *http.Request) {
 		secureEntryPoint(w, r)
 	case "tagmachine.telesoft.network":
 		secureEntryPoint(w, r)
-	case "tonedef.telesoft.network":
+	case "storefront.telesoft.network":
 		secureEntryPoint(w, r)
 	case "tsconsulting.telesoft.network":
 		secureEntryPoint(w, r)
