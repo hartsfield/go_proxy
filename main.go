@@ -146,7 +146,7 @@ func init() {
 	}
 
 	// add to proxyMap
-	proxyMap["terrâstreemâ.telesoft.network"] =
+	proxyMap["xn--terrstreem-64ag.telesoft.network"] =
 		&httputil.ReverseProxy{Director: directortst}
 
 }
@@ -206,7 +206,7 @@ func upgradeToTLS(w http.ResponseWriter, r *http.Request) {
 		secureEntryPoint(w, r)
 	case "btstrmr.xyz":
 		secureEntryPoint(w, r)
-	case "terrâstreemâ.telesoft.network":
+	case "xn--terrstreem-64ag.telesoft.network":
 		insecureEntryPoint(w, r)
 	case "tagmachine.xyz":
 		insecureEntryPoint(w, r)
