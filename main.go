@@ -136,6 +136,19 @@ func init() {
 	proxyMap["bt2.telesoft.network"] =
 		&httputil.ReverseProxy{Director: directorBt2}
 
+	// terrastreema
+	origintst, _ := url.Parse("http://localhost:8667/")
+	directortst := func(req *http.Request) {
+		req.Header.Add("X-Forwarded-Host", req.Host)
+		req.Header.Add("X-Origin-Host", origintst.Host)
+		req.URL.Scheme = "http"
+		req.URL.Host = origintst.Host
+	}
+
+	// add to proxyMap
+	proxyMap["terrâstreemâ.telesoft.network"] =
+		&httputil.ReverseProxy{Director: directortst}
+
 }
 
 func main() {
@@ -193,6 +206,8 @@ func upgradeToTLS(w http.ResponseWriter, r *http.Request) {
 		secureEntryPoint(w, r)
 	case "btstrmr.xyz":
 		secureEntryPoint(w, r)
+	case "terrâstreemâ.telesoft.network":
+		insecureEntryPoint(w, r)
 	case "tagmachine.xyz":
 		insecureEntryPoint(w, r)
 	default:
