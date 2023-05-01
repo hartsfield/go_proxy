@@ -63,7 +63,7 @@ func init() {
 	proxyMap["tagmachine.xyz"] =
 		&httputil.ReverseProxy{Director: directorTagMachine}
 
-	originStorefront, _ := url.Parse("http://localhost:8667/")
+	originStorefront, _ := url.Parse("http://localhost:8669/")
 	directorStorefront := func(req *http.Request) {
 		req.Header.Add("X-Forwarded-Host", req.Host)
 		req.Header.Add("X-Origin-Host", originStorefront.Host)
