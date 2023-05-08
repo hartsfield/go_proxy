@@ -111,7 +111,7 @@ func init() {
 	proxyMap["btstrmr.xyz"] =
 		&httputil.ReverseProxy{Director: directorBtstrmr}
 
-	originSpauth, _ := url.Parse("http://localhost:6666/")
+	originSpauth, _ := url.Parse("http://localhost:9555/")
 	directorSpauth := func(req *http.Request) {
 		req.Header.Add("X-Forwarded-Host", req.Host)
 		req.Header.Add("X-Origin-Host", originSpauth.Host)
@@ -120,7 +120,7 @@ func init() {
 	}
 
 	// add to proxyMap
-	proxyMap["travellog.telesoft.network"] =
+	proxyMap["sbvrt.telesoft.network"] =
 		&httputil.ReverseProxy{Director: directorSpauth}
 
 	// btstrmr 2
@@ -198,8 +198,8 @@ func upgradeToTLS(w http.ResponseWriter, r *http.Request) {
 		secureEntryPoint(w, r)
 	case "telesoft.network":
 		secureEntryPoint(w, r)
-	case "tagmachine.telesoft.network":
-		secureEntryPoint(w, r)
+	case "sbvrt.telesoft.network":
+		insecureEntryPoint(w, r)
 	case "storefront.telesoft.network":
 		insecureEntryPoint(w, r)
 	case "tsconsulting.telesoft.network":
