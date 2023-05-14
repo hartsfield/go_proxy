@@ -26,7 +26,6 @@ var proxyMap = make(map[string]*httputil.ReverseProxy)
 // If you want to modify this proxy for a different set of websites, follow the
 // pattern below. origin, director, proxyMap
 func init() {
-	//////// MysteryGift.org running on port 8050
 	originMysteryGift, _ := url.Parse("http://localhost:8050/")
 	directorMysteryGift := func(req *http.Request) {
 		req.Header.Add("X-Forwarded-Host", req.Host)
@@ -34,70 +33,11 @@ func init() {
 		req.URL.Scheme = "http"
 		req.URL.Host = originMysteryGift.Host
 	}
-
-	// add to proxyMap
 	proxyMap["mysterygift.org"] =
 		&httputil.ReverseProxy{Director: directorMysteryGift}
 
-	//////// TagMachine.TeleSoft.network running on port 9001
-	originTagMachine, _ := url.Parse("http://localhost:9001/")
-	directorTagMachine := func(req *http.Request) {
-		req.Header.Add("X-Forwarded-Host", req.Host)
-		req.Header.Add("X-Origin-Host", originTagMachine.Host)
-		req.URL.Scheme = "http"
-		req.URL.Host = originTagMachine.Host
-	}
-
-	///////// TeleSoft.network running on port 9002
-	originTeleSoft, _ := url.Parse("http://localhost:9002/")
-	directorTeleSoft := func(req *http.Request) {
-		req.Header.Add("X-Forwarded-Host", req.Host)
-		req.Header.Add("X-Origin-Host", originTeleSoft.Host)
-		req.URL.Scheme = "http"
-		req.URL.Host = originTeleSoft.Host
-	}
-
-	// add to proxyMap
-	proxyMap["telesoft.network"] =
-		&httputil.ReverseProxy{Director: directorTeleSoft}
-	proxyMap["tagmachine.xyz"] =
-		&httputil.ReverseProxy{Director: directorTagMachine}
-
-	originStorefront, _ := url.Parse("http://localhost:8669/")
-	directorStorefront := func(req *http.Request) {
-		req.Header.Add("X-Forwarded-Host", req.Host)
-		req.Header.Add("X-Origin-Host", originStorefront.Host)
-		req.URL.Scheme = "http"
-		req.URL.Host = originStorefront.Host
-	}
-
-	// add to proxyMap
-	proxyMap["storefront.telesoft.network"] =
-		&httputil.ReverseProxy{Director: directorStorefront}
-
-	originTSC, _ := url.Parse("http://localhost:9047/")
-	directorTSC := func(req *http.Request) {
-		req.Header.Add("X-Forwarded-Host", req.Host)
-		req.Header.Add("X-Origin-Host", originTSC.Host)
-		req.URL.Scheme = "http"
-		req.URL.Host = originTSC.Host
-	}
-
-	// add to proxyMap
-	proxyMap["tsconsulting.telesoft.network"] =
-		&httputil.ReverseProxy{Director: directorTSC}
-
-	originAngle, _ := url.Parse("http://localhost:4420/")
-	directorAngle := func(req *http.Request) {
-		req.Header.Add("X-Forwarded-Host", req.Host)
-		req.Header.Add("X-Origin-Host", originAngle.Host)
-		req.URL.Scheme = "http"
-		req.URL.Host = originAngle.Host
-	}
-
-	// add to proxyMap
-	proxyMap["anglewood.telesoft.network"] =
-		&httputil.ReverseProxy{Director: directorAngle}
+		//////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////
 
 	originBtstrmr, _ := url.Parse("http://localhost:5555/")
 	directorBtstrmr := func(req *http.Request) {
@@ -106,37 +46,64 @@ func init() {
 		req.URL.Scheme = "http"
 		req.URL.Host = originBtstrmr.Host
 	}
-
-	// add to proxyMap
 	proxyMap["btstrmr.xyz"] =
 		&httputil.ReverseProxy{Director: directorBtstrmr}
 
-	originSpauth, _ := url.Parse("http://localhost:9555/")
-	directorSpauth := func(req *http.Request) {
+		//////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////
+
+	originTagMachine, _ := url.Parse("http://localhost:9001/")
+	directorTagMachine := func(req *http.Request) {
 		req.Header.Add("X-Forwarded-Host", req.Host)
-		req.Header.Add("X-Origin-Host", originSpauth.Host)
+		req.Header.Add("X-Origin-Host", originTagMachine.Host)
 		req.URL.Scheme = "http"
-		req.URL.Host = originSpauth.Host
+		req.URL.Host = originTagMachine.Host
 	}
+	proxyMap["tagmachine.xyz"] =
+		&httputil.ReverseProxy{Director: directorTagMachine}
 
-	// add to proxyMap
-	proxyMap["sbvrt.telesoft.network"] =
-		&httputil.ReverseProxy{Director: directorSpauth}
+		//////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////
 
-	// btstrmr 2
-	originBt2, _ := url.Parse("http://localhost:8666/")
-	directorBt2 := func(req *http.Request) {
+	originTeleSoft, _ := url.Parse("http://localhost:9002/")
+	directorTeleSoft := func(req *http.Request) {
 		req.Header.Add("X-Forwarded-Host", req.Host)
-		req.Header.Add("X-Origin-Host", originBt2.Host)
+		req.Header.Add("X-Origin-Host", originTeleSoft.Host)
 		req.URL.Scheme = "http"
-		req.URL.Host = originBt2.Host
+		req.URL.Host = originTeleSoft.Host
 	}
+	proxyMap["telesoft.network"] =
+		&httputil.ReverseProxy{Director: directorTeleSoft}
 
-	// add to proxyMap
-	proxyMap["bt2.telesoft.network"] =
-		&httputil.ReverseProxy{Director: directorBt2}
+		//////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////
 
-	// terrastreema
+	originTSC, _ := url.Parse("http://localhost:9047/")
+	directorTSC := func(req *http.Request) {
+		req.Header.Add("X-Forwarded-Host", req.Host)
+		req.Header.Add("X-Origin-Host", originTSC.Host)
+		req.URL.Scheme = "http"
+		req.URL.Host = originTSC.Host
+	}
+	proxyMap["tsconsulting.telesoft.network"] =
+		&httputil.ReverseProxy{Director: directorTSC}
+
+		//////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////
+
+	originAngle, _ := url.Parse("http://localhost:4420/")
+	directorAngle := func(req *http.Request) {
+		req.Header.Add("X-Forwarded-Host", req.Host)
+		req.Header.Add("X-Origin-Host", originAngle.Host)
+		req.URL.Scheme = "http"
+		req.URL.Host = originAngle.Host
+	}
+	proxyMap["anglewood.telesoft.network"] =
+		&httputil.ReverseProxy{Director: directorAngle}
+
+		//////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////
+
 	origintst, _ := url.Parse("http://localhost:8667/")
 	directortst := func(req *http.Request) {
 		req.Header.Add("X-Forwarded-Host", req.Host)
@@ -144,10 +111,21 @@ func init() {
 		req.URL.Scheme = "http"
 		req.URL.Host = origintst.Host
 	}
-
-	// add to proxyMap
 	proxyMap["xn--terrstreem-64ag.telesoft.network"] =
 		&httputil.ReverseProxy{Director: directortst}
+
+		//////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////
+
+	origintSbvrt, _ := url.Parse("http://localhost:9669/")
+	directortSbvrt := func(req *http.Request) {
+		req.Header.Add("X-Forwarded-Host", req.Host)
+		req.Header.Add("X-Origin-Host", origintSbvrt.Host)
+		req.URL.Scheme = "http"
+		req.URL.Host = origintSbvrt.Host
+	}
+	proxyMap["sbvrt.telesoft.network"] =
+		&httputil.ReverseProxy{Director: directortSbvrt}
 
 }
 
@@ -199,8 +177,6 @@ func upgradeToTLS(w http.ResponseWriter, r *http.Request) {
 	case "telesoft.network":
 		secureEntryPoint(w, r)
 	case "sbvrt.telesoft.network":
-		insecureEntryPoint(w, r)
-	case "storefront.telesoft.network":
 		insecureEntryPoint(w, r)
 	case "tsconsulting.telesoft.network":
 		secureEntryPoint(w, r)
