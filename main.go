@@ -183,7 +183,7 @@ func upgradeToTLS(w http.ResponseWriter, r *http.Request) {
 	case "btstrmr.xyz":
 		secureEntryPoint(w, r)
 	case "particlestore.telesoft.network":
-		insecureEntryPoint(w, r)
+		secureEntryPoint(w, r)
 	case "tagmachine.xyz":
 		secureEntryPoint(w, r)
 	default:
