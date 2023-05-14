@@ -111,7 +111,7 @@ func init() {
 		req.URL.Scheme = "http"
 		req.URL.Host = origintst.Host
 	}
-	proxyMap["xn--terrstreem-64ag.telesoft.network"] =
+	proxyMap["particlestore.telesoft.network"] =
 		&httputil.ReverseProxy{Director: directortst}
 
 		//////////////////////////////////////////////////////////////////////
@@ -177,13 +177,13 @@ func upgradeToTLS(w http.ResponseWriter, r *http.Request) {
 	case "telesoft.network":
 		secureEntryPoint(w, r)
 	case "sbvrt.telesoft.network":
-		insecureEntryPoint(w, r)
+		secureEntryPoint(w, r)
 	case "tsconsulting.telesoft.network":
 		secureEntryPoint(w, r)
 	case "btstrmr.xyz":
 		secureEntryPoint(w, r)
-	case "xn--terrstreem-64ag.telesoft.network":
-		secureEntryPoint(w, r)
+	case "particlestore.telesoft.network":
+		insecureEntryPoint(w, r)
 	case "tagmachine.xyz":
 		secureEntryPoint(w, r)
 	default:
