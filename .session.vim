@@ -14,11 +14,13 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +1 main.go
+badd +1 m
+badd +170 main.go
 argglobal
 %argdel
 edit main.go
 argglobal
+balt m
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -29,12 +31,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 189 - ((44 * winheight(0) + 26) / 53)
+let s:l = 141 - ((37 * winheight(0) + 26) / 53)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 189
-normal! 023|
+keepjumps 141
+normal! 025|
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
@@ -47,7 +49,6 @@ if filereadable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &g:so = s:so_save | let &g:siso = s:siso_save
-nohlsearch
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :

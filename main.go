@@ -117,15 +117,28 @@ func init() {
 		//////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////
 
-	origintSbvrt, _ := url.Parse("http://localhost:9669/")
-	directortSbvrt := func(req *http.Request) {
+	originSbvrt, _ := url.Parse("http://localhost:9669/")
+	directorSbvrt := func(req *http.Request) {
 		req.Header.Add("X-Forwarded-Host", req.Host)
-		req.Header.Add("X-Origin-Host", origintSbvrt.Host)
+		req.Header.Add("X-Origin-Host", originSbvrt.Host)
 		req.URL.Scheme = "http"
-		req.URL.Host = origintSbvrt.Host
+		req.URL.Host = originSbvrt.Host
 	}
 	proxyMap["sbvrt.telesoft.network"] =
-		&httputil.ReverseProxy{Director: directortSbvrt}
+		&httputil.ReverseProxy{Director: directorSbvrt}
+
+		//////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////
+
+	originGeneric, _ := url.Parse("http://localhost:9677/")
+	directorGeneric := func(req *http.Request) {
+		req.Header.Add("X-Forwarded-Host", req.Host)
+		req.Header.Add("X-Origin-Host", originGeneric.Host)
+		req.URL.Scheme = "http"
+		req.URL.Host = originGeneric.Host
+	}
+	proxyMap["generic.telesoft.network"] =
+		&httputil.ReverseProxy{Director: directorGeneric}
 
 }
 
