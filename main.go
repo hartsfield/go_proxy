@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"log"
@@ -9,6 +10,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -27,8 +29,8 @@ import (
 // NOTE: You need to run those iptables commands again after reboots.
 // NOTE: When renewing certs, reboot, and make sure this program is not running.
 // NOTE: After renewing certs, mv them to ~/tlsCerts and chown -R USER ~/tlsCerts/*
-// NOTE: Make sure these files have the correct permissions, you likely
-// copied them from root.
+// NOTE: Make sure these files have the correct permissions, you likely copied
+// them from root.
 
 type tlsCerts struct {
 	Privkey   string
@@ -40,6 +42,7 @@ type service struct {
 	Port         string
 	ReverseProxy *httputil.ReverseProxy
 	TLSEnabled   bool
+	AlertsOn     bool
 }
 
 var (
@@ -50,61 +53,30 @@ var (
 	httpPort string = ":8080"
 	tlsPort  string = ":8443"
 	proxyMap        = make(map[string]*service)
-	services        = []*service{
-		{
-			DomainName: "mysterygift.org",
-			Port:       "8050",
-			TLSEnabled: true,
-		},
-		{
-			DomainName: "btstrmr.xyz",
-			Port:       "5555",
-			TLSEnabled: true,
-		},
-		{
-			DomainName: "tagmachine.xyz",
-			Port:       "9001",
-			TLSEnabled: true,
-		},
-		{
-			DomainName: "telesoft.network",
-			Port:       "9002",
-			TLSEnabled: true,
-		},
-		{
-			DomainName: "sbvrt.telesoft.network",
-			Port:       "9669",
-			TLSEnabled: true,
-		},
-		{
-			DomainName: "particlestore.telesoft.network",
-			Port:       "8667",
-			TLSEnabled: true,
-		},
-		{
-			DomainName: "tsconsulting.telesoft.network",
-			Port:       "9047",
-			TLSEnabled: true,
-		},
-		{
-			DomainName: "generic.telesoft.network",
-			Port:       "9677",
-			TLSEnabled: true,
-		},
-		{
-			DomainName: "anglewood.telesoft.network",
-			Port:       "4420",
-			TLSEnabled: true,
-		},
-	}
 )
 
 func init() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	rand.Seed(time.Now().UTC().UnixNano())
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	for _, service := range services {
-		proxyMap[service.DomainName] = makeProxy(service)
+	file, err := os.Open("gpSecure.config")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		s := &service{
+			DomainName: strings.Split(scanner.Text(), ":")[0],
+			Port:       strings.Split(scanner.Text(), ":")[1],
+			TLSEnabled: true,
+		}
+		proxyMap[s.DomainName] = makeProxy(s)
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Println(err)
 	}
 
 	if certs.Fullchain == "" || certs.Privkey == "" {
