@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"context"
-	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
@@ -108,20 +107,17 @@ func main() {
 		Handler:           http.HandlerFunc(forwardTLS),
 	}
 
-	ctx, cancelCtx := context.WithCancel(context.Background())
+	ctx := context.Context(context.Background())
 	go func() {
 		err := insecure.ListenAndServe()
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
-		cancelCtx()
-	}()
-	go func() {
-		err := secure.ListenAndServeTLS(certs.Fullchain, certs.Privkey)
+
+		err = secure.ListenAndServeTLS(certs.Fullchain, certs.Privkey)
 		if err != nil {
 			log.Println(err)
 		}
-		cancelCtx()
 	}()
 
 	<-ctx.Done()
@@ -141,7 +137,7 @@ func forwardTLS(w http.ResponseWriter, r *http.Request) {
 func forwardHTTP(w http.ResponseWriter, r *http.Request) {
 	if host, ok := proxyMap[r.Host]; ok {
 		if proxyMap[r.Host].TLSEnabled {
-			secureEntryPoint(w, r)
+			secureRedirect(w, r)
 			return
 		}
 		host.ReverseProxy.ServeHTTP(w, r)
@@ -150,9 +146,9 @@ func forwardHTTP(w http.ResponseWriter, r *http.Request) {
 	notFound(w, r)
 }
 
-// secureEntryPoint is used to re-write the host name and redirect the user to
+// secureRedirect is used to re-write the host name and redirect the user to
 // the secure website via https.
-func secureEntryPoint(w http.ResponseWriter, r *http.Request) {
+func secureRedirect(w http.ResponseWriter, r *http.Request) {
 	target := "https://" + r.Host + r.URL.Path
 	if len(r.URL.RawQuery) > 0 {
 		target += "?" + r.URL.RawQuery
