@@ -51,10 +51,10 @@ var (
 		Privkey:   os.Getenv("privkey"),
 		Fullchain: os.Getenv("fullchain"),
 	}
-	httpPort          string       = ":8080"
-	tlsPort           string       = ":8443"
-	proxyMap                       = make(map[string]*service)
-	genericServerConf *http.Server = &http.Server{
+	httpPort          string      = ":8080"
+	tlsPort           string      = ":8443"
+	proxyMap                      = make(map[string]*service)
+	genericServerConf http.Server = http.Server{
 		ReadHeaderTimeout: 5 * time.Second,
 		WriteTimeout:      10 * time.Second,
 		IdleTimeout:       5 * time.Second,
@@ -99,11 +99,11 @@ func init() {
 }
 
 func main() {
-	insecure := genericServerConf
+	insecure := &genericServerConf
 	insecure.Addr = httpPort
 	insecure.Handler = http.HandlerFunc(forwardHTTP)
 
-	secure := genericServerConf
+	secure := &genericServerConf
 	secure.Addr = tlsPort
 	secure.Handler = http.HandlerFunc(forwardTLS)
 
@@ -129,6 +129,7 @@ func startTLSServer(s *http.Server) {
 	if err != nil {
 		log.Println(err)
 	}
+	globalHalt()
 }
 
 func forwardTLS(w http.ResponseWriter, r *http.Request) {
