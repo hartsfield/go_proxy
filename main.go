@@ -1,11 +1,15 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"time"
 )
 
 // This program runs on port 8080 for http traffic and 8443 for https. This is
@@ -18,156 +22,130 @@ import (
 // sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
 // sudo iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 8443
 //
-// You may need to run these commands again after restarts.
+//
+// IMPORTANT:
+// NOTE: You need to run those iptables commands again after reboots.
+// NOTE: When renewing certs, reboot, and make sure this program is not running.
+// NOTE: After renewing certs, mv them to ~/tlsCerts and chown -R USER ~/tlsCerts/*
+// NOTE: Make sure these files have the correct permissions, you likely
+// copied them from root.
 
-// proxyMap is a hashmap of our website hostnames to their proxy.
-var proxyMap = make(map[string]*httputil.ReverseProxy)
+type tlsCerts struct {
+	Privkey   string
+	Fullchain string
+}
 
-// If you want to modify this proxy for a different set of websites, follow the
-// pattern below. origin, director, proxyMap
+type service struct {
+	DomainName   string
+	Port         string
+	ReverseProxy *httputil.ReverseProxy
+	TLSEnabled   bool
+}
+
+var (
+	certs tlsCerts = tlsCerts{
+		Privkey:   os.Getenv("privkey"),
+		Fullchain: os.Getenv("fullchain"),
+	}
+	httpPort string = ":8080"
+	tlsPort  string = ":8443"
+	proxyMap        = make(map[string]*service)
+	services        = []*service{
+		{
+			DomainName: "mysterygift.org",
+			Port:       "8050",
+			TLSEnabled: true,
+		},
+		{
+			DomainName: "btstrmr.xyz",
+			Port:       "5555",
+			TLSEnabled: true,
+		},
+		{
+			DomainName: "tagmachine.xyz",
+			Port:       "9001",
+			TLSEnabled: true,
+		},
+		{
+			DomainName: "telesoft.network",
+			Port:       "9002",
+			TLSEnabled: true,
+		},
+		{
+			DomainName: "sbvrt.telesoft.network",
+			Port:       "9669",
+			TLSEnabled: true,
+		},
+		{
+			DomainName: "particlestore.telesoft.network",
+			Port:       "8667",
+			TLSEnabled: true,
+		},
+		{
+			DomainName: "tsconsulting.telesoft.network",
+			Port:       "9047",
+			TLSEnabled: true,
+		},
+		{
+			DomainName: "generic.telesoft.network",
+			Port:       "9677",
+			TLSEnabled: true,
+		},
+		{
+			DomainName: "anglewood.telesoft.network",
+			Port:       "4420",
+			TLSEnabled: true,
+		},
+	}
+)
+
 func init() {
-	originMysteryGift, _ := url.Parse("http://localhost:8050/")
-	directorMysteryGift := func(req *http.Request) {
-		req.Header.Add("X-Forwarded-Host", req.Host)
-		req.Header.Add("X-Origin-Host", originMysteryGift.Host)
-		req.URL.Scheme = "http"
-		req.URL.Host = originMysteryGift.Host
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	rand.Seed(time.Now().UTC().UnixNano())
+
+	for _, service := range services {
+		proxyMap[service.DomainName] = makeProxy(service)
 	}
-	proxyMap["mysterygift.org"] =
-		&httputil.ReverseProxy{Director: directorMysteryGift}
 
-		//////////////////////////////////////////////////////////////////////
-		//////////////////////////////////////////////////////////////////////
-
-	originBtstrmr, _ := url.Parse("http://localhost:5555/")
-	directorBtstrmr := func(req *http.Request) {
-		req.Header.Add("X-Forwarded-Host", req.Host)
-		req.Header.Add("X-Origin-Host", originBtstrmr.Host)
-		req.URL.Scheme = "http"
-		req.URL.Host = originBtstrmr.Host
+	if certs.Fullchain == "" || certs.Privkey == "" {
+		certs.Fullchain = "~/tlsCerts/fullchain.pem"
+		certs.Privkey = "~/tlsCerts/privkey.pem"
 	}
-	proxyMap["btstrmr.xyz"] =
-		&httputil.ReverseProxy{Director: directorBtstrmr}
-
-		//////////////////////////////////////////////////////////////////////
-		//////////////////////////////////////////////////////////////////////
-
-	originTagMachine, _ := url.Parse("http://localhost:9001/")
-	directorTagMachine := func(req *http.Request) {
-		req.Header.Add("X-Forwarded-Host", req.Host)
-		req.Header.Add("X-Origin-Host", originTagMachine.Host)
-		req.URL.Scheme = "http"
-		req.URL.Host = originTagMachine.Host
-	}
-	proxyMap["tagmachine.xyz"] =
-		&httputil.ReverseProxy{Director: directorTagMachine}
-
-		//////////////////////////////////////////////////////////////////////
-		//////////////////////////////////////////////////////////////////////
-
-	originTeleSoft, _ := url.Parse("http://localhost:9002/")
-	directorTeleSoft := func(req *http.Request) {
-		req.Header.Add("X-Forwarded-Host", req.Host)
-		req.Header.Add("X-Origin-Host", originTeleSoft.Host)
-		req.URL.Scheme = "http"
-		req.URL.Host = originTeleSoft.Host
-	}
-	proxyMap["telesoft.network"] =
-		&httputil.ReverseProxy{Director: directorTeleSoft}
-
-		//////////////////////////////////////////////////////////////////////
-		//////////////////////////////////////////////////////////////////////
-
-	originTSC, _ := url.Parse("http://localhost:9047/")
-	directorTSC := func(req *http.Request) {
-		req.Header.Add("X-Forwarded-Host", req.Host)
-		req.Header.Add("X-Origin-Host", originTSC.Host)
-		req.URL.Scheme = "http"
-		req.URL.Host = originTSC.Host
-	}
-	proxyMap["tsconsulting.telesoft.network"] =
-		&httputil.ReverseProxy{Director: directorTSC}
-
-		//////////////////////////////////////////////////////////////////////
-		//////////////////////////////////////////////////////////////////////
-
-	originAngle, _ := url.Parse("http://localhost:4420/")
-	directorAngle := func(req *http.Request) {
-		req.Header.Add("X-Forwarded-Host", req.Host)
-		req.Header.Add("X-Origin-Host", originAngle.Host)
-		req.URL.Scheme = "http"
-		req.URL.Host = originAngle.Host
-	}
-	proxyMap["anglewood.telesoft.network"] =
-		&httputil.ReverseProxy{Director: directorAngle}
-
-		//////////////////////////////////////////////////////////////////////
-		//////////////////////////////////////////////////////////////////////
-
-	origintst, _ := url.Parse("http://localhost:8667/")
-	directortst := func(req *http.Request) {
-		req.Header.Add("X-Forwarded-Host", req.Host)
-		req.Header.Add("X-Origin-Host", origintst.Host)
-		req.URL.Scheme = "http"
-		req.URL.Host = origintst.Host
-	}
-	proxyMap["particlestore.telesoft.network"] =
-		&httputil.ReverseProxy{Director: directortst}
-
-		//////////////////////////////////////////////////////////////////////
-		//////////////////////////////////////////////////////////////////////
-
-	originSbvrt, _ := url.Parse("http://localhost:9669/")
-	directorSbvrt := func(req *http.Request) {
-		req.Header.Add("X-Forwarded-Host", req.Host)
-		req.Header.Add("X-Origin-Host", originSbvrt.Host)
-		req.URL.Scheme = "http"
-		req.URL.Host = originSbvrt.Host
-	}
-	proxyMap["sbvrt.telesoft.network"] =
-		&httputil.ReverseProxy{Director: directorSbvrt}
-
-		//////////////////////////////////////////////////////////////////////
-		//////////////////////////////////////////////////////////////////////
-
-	originGeneric, _ := url.Parse("http://localhost:9677/")
-	directorGeneric := func(req *http.Request) {
-		req.Header.Add("X-Forwarded-Host", req.Host)
-		req.Header.Add("X-Origin-Host", originGeneric.Host)
-		req.URL.Scheme = "http"
-		req.URL.Host = originGeneric.Host
-	}
-	proxyMap["generic.telesoft.network"] =
-		&httputil.ReverseProxy{Director: directorGeneric}
-
 }
 
 func main() {
-	// run insecureEntryPoint() when users visit the server
-	http.HandleFunc("/", insecureEntryPoint)
-
-	// Start a TLS (HTTPS) server, with links to files generated by
-	// letsencrypt.
-	// NOTE: When renewing certs, make sure this program is not running,
-	// and you have reset iptables so that it doesn't redirect traffic
-	// NOTE: Make sure these files have the correct permissions, you likely
-	// copied them from root.
-	go http.ListenAndServeTLS(":8443", os.Getenv("fullchain"), os.Getenv("privkey"), nil)
-
-	// start an http server
-	log.Fatal(http.ListenAndServe(":8080", http.HandlerFunc(upgradeToTLS)))
-}
-
-// insecureEntryPoint is used when we cant upgrade to TLS
-func insecureEntryPoint(w http.ResponseWriter, r *http.Request) {
-	// check the host name and make sure it exists in our proxyMap. then
-	// redirect the user to the appropriate port
-	if host, ok := proxyMap[r.Host]; ok {
-		host.ServeHTTP(w, r)
-		return
+	insecure := &http.Server{
+		Addr:              httpPort,
+		ReadHeaderTimeout: 5 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       5 * time.Second,
+		Handler:           http.HandlerFunc(secureEntryPoint),
 	}
-	// else redirect the user to the not found page
-	notFound(w, r)
+	secure := &http.Server{
+		Addr:              tlsPort,
+		ReadHeaderTimeout: 5 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       5 * time.Second,
+		Handler:           http.HandlerFunc(secureEntryPoint),
+	}
+
+	ctx, cancelCtx := context.WithCancel(context.Background())
+	go func() {
+		err := insecure.ListenAndServe()
+		if err != nil {
+			fmt.Println(err)
+		}
+		cancelCtx()
+	}()
+	go func() {
+		err := secure.ListenAndServeTLS(certs.Fullchain, certs.Privkey)
+		if err != nil {
+			log.Println(err)
+		}
+		cancelCtx()
+	}()
+
+	<-ctx.Done()
 }
 
 // secureEntryPoint is used to re-write the host name and redirect the user to
@@ -180,33 +158,30 @@ func secureEntryPoint(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, target, http.StatusTemporaryRedirect)
 }
 
-// upgradeToTLS checks the host, if we have certs for the host we upgrade their
-// connection to TLS secured (https) using secureEntryPoint(). Otherwise we
-// use insecureEntryPoint() to attempt to send them to the insecured page.
-func upgradeToTLS(w http.ResponseWriter, r *http.Request) {
-	switch r.Host {
-	case "mysterygift.org":
-		secureEntryPoint(w, r)
-	case "btstrmr.xyz":
-		secureEntryPoint(w, r)
-	case "tagmachine.xyz":
-		secureEntryPoint(w, r)
-	case "telesoft.network":
-		secureEntryPoint(w, r)
-	case "tsconsulting.telesoft.network":
-		secureEntryPoint(w, r)
-	case "particlestore.telesoft.network":
-		secureEntryPoint(w, r)
-	case "sbvrt.telesoft.network":
-		secureEntryPoint(w, r)
-	case "anglewood.telesoft.network":
-		secureEntryPoint(w, r)
-	default:
-		insecureEntryPoint(w, r)
-	}
-}
-
 // notFound is used If the user tries to visit a host that can't be found.
 func notFound(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("coming soon"))
+}
+
+// makeProxy takes var #SERVICE *service{} and creates a *http.ReverseProxy
+// using the properties of #SERVICE
+func makeProxy(s *service) *service {
+	u, err := url.Parse("localhost:" + s.Port)
+	if err != nil {
+		log.Println(err)
+	}
+	s.ReverseProxy = &httputil.ReverseProxy{
+		Director: func(req *http.Request) {
+			req.Header.Add("X-Forwarded-Host", req.Host)
+			req.Header.Add("X-Origin-Host", u.Host)
+			req.URL.Host = u.Host
+			if s.TLSEnabled {
+				req.URL.Scheme = "https"
+			} else {
+				req.URL.Scheme = "http"
+			}
+		},
+		FlushInterval: -1,
+	}
+	return s
 }
