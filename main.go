@@ -110,7 +110,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	globalHalt = cancel
 
-	// go startHTTPServer(insecure)
+	go startHTTPServer(insecure)
 	go startTLSServer(secure)
 
 	<-ctx.Done()
