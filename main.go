@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
@@ -45,20 +46,26 @@ type service struct {
 }
 
 var (
-	certs tlsCerts = tlsCerts{
+	globalHalt context.CancelFunc
+	certs      tlsCerts = tlsCerts{
 		Privkey:   os.Getenv("privkey"),
 		Fullchain: os.Getenv("fullchain"),
 	}
-	httpPort string = ":8080"
-	tlsPort  string = ":8443"
-	proxyMap        = make(map[string]*service)
+	httpPort          string       = ":8080"
+	tlsPort           string       = ":8443"
+	proxyMap                       = make(map[string]*service)
+	genericServerConf *http.Server = &http.Server{
+		ReadHeaderTimeout: 5 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       5 * time.Second,
+	}
 )
 
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	file, err := os.Open("gpSecure.config")
+	file, err := os.Open("prox.config")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -92,36 +99,38 @@ func init() {
 }
 
 func main() {
-	insecure := &http.Server{
-		Addr:              httpPort,
-		ReadHeaderTimeout: 5 * time.Second,
-		WriteTimeout:      10 * time.Second,
-		IdleTimeout:       5 * time.Second,
-		Handler:           http.HandlerFunc(forwardHTTP),
-	}
-	secure := &http.Server{
-		Addr:              tlsPort,
-		ReadHeaderTimeout: 5 * time.Second,
-		WriteTimeout:      10 * time.Second,
-		IdleTimeout:       5 * time.Second,
-		Handler:           http.HandlerFunc(forwardTLS),
-	}
+	insecure := genericServerConf
+	insecure.Addr = httpPort
+	insecure.Handler = http.HandlerFunc(forwardHTTP)
 
-	ctx := context.Context(context.Background())
-	go func() {
-		err := insecure.ListenAndServe()
-		if err != nil {
-			log.Println(err)
-		}
+	secure := genericServerConf
+	secure.Addr = tlsPort
+	secure.Handler = http.HandlerFunc(forwardTLS)
 
-		err = secure.ListenAndServeTLS(certs.Fullchain, certs.Privkey)
-		if err != nil {
-			log.Println(err)
-		}
-	}()
+	ctx, cancel := context.WithCancel(context.Background())
+	globalHalt = cancel
+
+	go startHTTPServer(insecure)
+	go startTLSServer(secure)
 
 	<-ctx.Done()
 }
+
+func startHTTPServer(s *http.Server) {
+	err := s.ListenAndServe()
+	if err != nil {
+		fmt.Println(err)
+	}
+	globalHalt()
+}
+
+func startTLSServer(s *http.Server) {
+	err := s.ListenAndServeTLS(certs.Fullchain, certs.Privkey)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
 func forwardTLS(w http.ResponseWriter, r *http.Request) {
 	if host, ok := proxyMap[r.Host]; ok {
 		if proxyMap[r.Host].TLSEnabled {
@@ -137,7 +146,7 @@ func forwardTLS(w http.ResponseWriter, r *http.Request) {
 func forwardHTTP(w http.ResponseWriter, r *http.Request) {
 	if host, ok := proxyMap[r.Host]; ok {
 		if proxyMap[r.Host].TLSEnabled {
-			secureRedirect(w, r)
+			tlsRedirect(w, r)
 			return
 		}
 		host.ReverseProxy.ServeHTTP(w, r)
@@ -146,9 +155,9 @@ func forwardHTTP(w http.ResponseWriter, r *http.Request) {
 	notFound(w, r)
 }
 
-// secureRedirect is used to re-write the host name and redirect the user to
+// tlsRedirect is used to re-write the host name and redirect the user to
 // the secure website via https.
-func secureRedirect(w http.ResponseWriter, r *http.Request) {
+func tlsRedirect(w http.ResponseWriter, r *http.Request) {
 	target := "https://" + r.Host + r.URL.Path
 	if len(r.URL.RawQuery) > 0 {
 		target += "?" + r.URL.RawQuery
