@@ -91,14 +91,14 @@ func main() {
 		ReadHeaderTimeout: 5 * time.Second,
 		WriteTimeout:      10 * time.Second,
 		IdleTimeout:       5 * time.Second,
-		Handler:           http.HandlerFunc(secureEntryPoint),
+		Handler:           http.HandlerFunc(insecureEntryPoint),
 	}
 	secure := &http.Server{
 		Addr:              tlsPort,
 		ReadHeaderTimeout: 5 * time.Second,
 		WriteTimeout:      10 * time.Second,
 		IdleTimeout:       5 * time.Second,
-		Handler:           http.HandlerFunc(secureEntryPoint),
+		Handler:           http.HandlerFunc(verifyAndForward),
 	}
 
 	ctx, cancelCtx := context.WithCancel(context.Background())
@@ -118,6 +118,29 @@ func main() {
 	}()
 
 	<-ctx.Done()
+}
+
+func verifyAndForward(w http.ResponseWriter, r *http.Request) {
+	if host, ok := proxyMap[r.Host]; ok {
+		if proxyMap[r.Host].TLSEnabled {
+			host.ReverseProxy.ServeHTTP(w, r)
+			return
+		}
+		insecureEntryPoint(w, r)
+	}
+	notFound(w, r)
+}
+
+// insecureEntryPoint is used when we cant upgrade to TLS
+func insecureEntryPoint(w http.ResponseWriter, r *http.Request) {
+	if host, ok := proxyMap[r.Host]; ok {
+		if proxyMap[r.Host].TLSEnabled {
+			secureEntryPoint(w, r)
+		}
+		host.ReverseProxy.ServeHTTP(w, r)
+		return
+	}
+	notFound(w, r)
 }
 
 // secureEntryPoint is used to re-write the host name and redirect the user to
