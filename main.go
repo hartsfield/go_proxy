@@ -38,11 +38,11 @@ type tlsCerts struct {
 }
 
 type service struct {
-	DomainName   string
 	Port         string
-	ReverseProxy *httputil.ReverseProxy
 	TLSEnabled   bool
 	AlertsOn     bool
+	DomainName   string
+	ReverseProxy *httputil.ReverseProxy
 }
 
 var (
@@ -67,11 +67,18 @@ func init() {
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
+		sc := strings.Split(scanner.Text(), ":")
 		s := &service{
-			DomainName: strings.Split(scanner.Text(), ":")[0],
-			Port:       strings.Split(scanner.Text(), ":")[1],
-			TLSEnabled: true,
+			Port:       sc[0],
+			DomainName: sc[3],
 		}
+		if sc[1] == "true" {
+			s.TLSEnabled = true
+		}
+		if sc[2] == "true" {
+			s.AlertsOn = true
+		}
+
 		proxyMap[s.DomainName] = makeProxy(s)
 	}
 
