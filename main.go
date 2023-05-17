@@ -170,7 +170,7 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 // makeProxy takes var #SERVICE *service{} and creates a *http.ReverseProxy
 // using the properties of #SERVICE
 func makeProxy(s *service) *service {
-	u, err := url.Parse("localhost:" + s.Port)
+	u, err := url.Parse("http://localhost:" + s.Port)
 	if err != nil {
 		log.Println(err)
 	}
