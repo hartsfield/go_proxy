@@ -168,7 +168,7 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 // makeProxy takes var #SERVICE *service{} and creates a *http.ReverseProxy
 // using the properties of #SERVICE
 func makeProxy(s *service) *service {
-	u, err := url.Parse("http://localhost:" + s.Port)
+	u, err := url.Parse("http://localhost:" + s.Port + "/")
 	if err != nil {
 		log.Println(err)
 	}
@@ -177,11 +177,7 @@ func makeProxy(s *service) *service {
 			req.Header.Add("X-Forwarded-Host", req.Host)
 			req.Header.Add("X-Origin-Host", u.Host)
 			req.URL.Host = u.Host
-			if s.TLSEnabled {
-				req.URL.Scheme = "https"
-			} else {
-				req.URL.Scheme = "http"
-			}
+			req.URL.Scheme = "http"
 		},
 		FlushInterval: -1,
 	}
