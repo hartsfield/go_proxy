@@ -111,7 +111,7 @@ func main() {
 	globalHalt = cancel
 
 	go startHTTPServer(insecure)
-	go startTLSServer(secure)
+	// go startTLSServer(secure)
 
 	<-ctx.Done()
 }
