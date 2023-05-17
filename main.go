@@ -134,6 +134,7 @@ func verifyAndForward(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		insecureEntryPoint(w, r)
+		return
 	}
 	notFound(w, r)
 }
@@ -143,6 +144,7 @@ func insecureEntryPoint(w http.ResponseWriter, r *http.Request) {
 	if host, ok := proxyMap[r.Host]; ok {
 		if proxyMap[r.Host].TLSEnabled {
 			secureEntryPoint(w, r)
+			return
 		}
 		host.ReverseProxy.ServeHTTP(w, r)
 		return
