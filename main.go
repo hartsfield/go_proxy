@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"context"
-	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
@@ -51,14 +50,9 @@ var (
 		Privkey:   os.Getenv("privkey"),
 		Fullchain: os.Getenv("fullchain"),
 	}
-	httpPort          string      = ":8080"
-	tlsPort           string      = ":8443"
-	proxyMap                      = make(map[string]*service)
-	genericServerConf http.Server = http.Server{
-		ReadHeaderTimeout: 5 * time.Second,
-		WriteTimeout:      10 * time.Second,
-		IdleTimeout:       5 * time.Second,
-	}
+	httpPort string = ":8080"
+	tlsPort  string = ":8443"
+	proxyMap        = make(map[string]*service)
 )
 
 func init() {
@@ -98,14 +92,19 @@ func init() {
 	}
 }
 
-func main() {
-	insecure := &genericServerConf
-	insecure.Addr = httpPort
-	insecure.Handler = http.HandlerFunc(forwardHTTP)
+func newServerConf(port string, hf http.HandlerFunc) *http.Server {
+	return &http.Server{
+		Addr:              port,
+		Handler:           hf,
+		ReadHeaderTimeout: 5 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       5 * time.Second,
+	}
+}
 
-	secure := &genericServerConf
-	secure.Addr = tlsPort
-	secure.Handler = http.HandlerFunc(forwardTLS)
+func main() {
+	insecure := newServerConf(httpPort, http.HandlerFunc(forwardHTTP))
+	secure := newServerConf(tlsPort, http.HandlerFunc(forwardTLS))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	globalHalt = cancel
@@ -119,7 +118,7 @@ func main() {
 func startHTTPServer(s *http.Server) {
 	err := s.ListenAndServe()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 	globalHalt()
 }
