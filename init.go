@@ -12,6 +12,12 @@ import (
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	f, err := os.OpenFile("testlogfile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	defer f.Close()
+	log.SetOutput(f)
 
 	file, err := os.Open(confPath)
 	if err != nil {
