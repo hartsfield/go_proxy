@@ -1,28 +1,39 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"log"
-	"math/rand"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
-	"strings"
 	"time"
 )
 
-// This program runs on port 8080 for http traffic and 8443 for https. This is
-// so that the program won't need to run with administrative privileges.
+// PROX
 //
-// When running this on a new server, use iptables to redirect traffic from
-// port 443 to port 8443, and from port 80 to port 8080, the following commands
-// should achieve this on most Linux systems:
+// prox80=http_port
+// prox443=https_port
+// proxConf=/path/to/configuraton
+// privkey=/path/to/privkey
+// fullchain=/path/to/fullchain
+//
+// ex.
+//
+// prox80=8080 prox443=8443 proxConf=prox.config privkey=~/tlsCerts/privkey.pem fullchain=~/tlsCerts/fullchain.pem prox
+//
+// It is advised to forward traffic on port :80 (HTTP) and :443 (HTTPS/TLS) to
+// higher ports which dont require administrator privileges. By default prox
+// runs on port :8080 for HTTP, and port :8443 for HTTPS traffic.You can change
+// these defaults by run with different environment variables.
+//
+// When restarting the server, you can use iptables to redirect traffic from
+// port :443 to port :8443, and from port :80 to port :8080, or whatever your
+// desired prts may be. The following commands should achieve this on most
+// Linux systems:
 //
 // sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
 // sudo iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 8443
-//
 //
 // IMPORTANT:
 // NOTE: You need to run those iptables commands again after reboots.
@@ -46,61 +57,15 @@ type service struct {
 
 var (
 	globalHalt context.CancelFunc
-	certs      tlsCerts = tlsCerts{
+	certs      *tlsCerts = &tlsCerts{
 		Privkey:   os.Getenv("privkey"),
 		Fullchain: os.Getenv("fullchain"),
 	}
-	httpPort string = ":8080"
-	tlsPort  string = ":8443"
-	proxyMap        = make(map[string]*service)
+	httpPort string              = os.Getenv("prox80")
+	tlsPort  string              = os.Getenv("prox443")
+	confPath string              = os.Getenv("proxConf")
+	proxyMap map[string]*service = make(map[string]*service)
 )
-
-func init() {
-	rand.Seed(time.Now().UTC().UnixNano())
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-
-	file, err := os.Open("prox.config")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		sc := strings.Split(scanner.Text(), ":")
-		s := &service{
-			Port:       sc[0],
-			DomainName: sc[3],
-		}
-		if sc[1] == "true" {
-			s.TLSEnabled = true
-		}
-		if sc[2] == "true" {
-			s.AlertsOn = true
-		}
-
-		proxyMap[s.DomainName] = makeProxy(s)
-	}
-
-	if err := scanner.Err(); err != nil {
-		log.Println(err)
-	}
-
-	if certs.Fullchain == "" || certs.Privkey == "" {
-		certs.Fullchain = "~/tlsCerts/fullchain.pem"
-		certs.Privkey = "~/tlsCerts/privkey.pem"
-	}
-}
-
-func newServerConf(port string, hf http.HandlerFunc) *http.Server {
-	return &http.Server{
-		Addr:              port,
-		Handler:           hf,
-		ReadHeaderTimeout: 5 * time.Second,
-		WriteTimeout:      10 * time.Second,
-		IdleTimeout:       5 * time.Second,
-	}
-}
 
 func main() {
 	insecure := newServerConf(httpPort, http.HandlerFunc(forwardHTTP))
@@ -113,6 +78,16 @@ func main() {
 	go startTLSServer(secure)
 
 	<-ctx.Done()
+}
+
+func newServerConf(port string, hf http.HandlerFunc) *http.Server {
+	return &http.Server{
+		Addr:              port,
+		Handler:           hf,
+		ReadHeaderTimeout: 5 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       5 * time.Second,
+	}
 }
 
 func startHTTPServer(s *http.Server) {
