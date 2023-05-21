@@ -82,7 +82,7 @@ func main() {
 
 func newServerConf(port string, hf http.HandlerFunc) *http.Server {
 	return &http.Server{
-		Addr:              port,
+		Addr:              ":" + port,
 		Handler:           hf,
 		ReadHeaderTimeout: 5 * time.Second,
 		WriteTimeout:      10 * time.Second,
