@@ -35,10 +35,10 @@ func startTLSServer(s *http.Server) {
 func forwardTLS(w http.ResponseWriter, r *http.Request) {
 	if host, ok := proxyMap[r.Host]; ok {
 		if proxyMap[r.Host].TLSEnabled {
+			log.Println(r.URL.String())
 			host.ReverseProxy.ServeHTTP(w, r)
 			return
 		}
-		log.Println(r.URL.String())
 		forwardHTTP(w, r)
 		return
 	}
