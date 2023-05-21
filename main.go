@@ -64,6 +64,7 @@ var (
 	tlsPort  string              = os.Getenv("prox443")
 	confPath string              = os.Getenv("proxConf")
 	proxyMap map[string]*service = make(map[string]*service)
+	f        *os.File
 )
 
 func main() {
