@@ -18,6 +18,7 @@ func init() {
 	}
 	defer f.Close()
 	log.SetOutput(f)
+	log.Println("test")
 
 	file, err := os.Open(confPath)
 	if err != nil {
