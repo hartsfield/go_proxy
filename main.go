@@ -121,7 +121,8 @@ func forwardTLS(w http.ResponseWriter, r *http.Request) {
 func forwardHTTP(w http.ResponseWriter, r *http.Request) {
 	if host, ok := proxyMap[r.Host]; ok {
 		if proxyMap[r.Host].TLSEnabled {
-			tlsRedirect(w, r)
+			// tlsRedirect(w, r)
+			forwardTLS(w, r)
 			return
 		}
 		host.ReverseProxy.ServeHTTP(w, r)
@@ -132,13 +133,13 @@ func forwardHTTP(w http.ResponseWriter, r *http.Request) {
 
 // tlsRedirect is used to re-write the host name and redirect the user to
 // the secure website via https.
-func tlsRedirect(w http.ResponseWriter, r *http.Request) {
-	target := "https://" + r.Host + r.URL.Path
-	if len(r.URL.RawQuery) > 0 {
-		target += "?" + r.URL.RawQuery
-	}
-	http.Redirect(w, r, target, http.StatusTemporaryRedirect)
-}
+// func tlsRedirect(w http.ResponseWriter, r *http.Request) {
+// 	target := "https://" + r.Host + r.URL.Path
+// 	if len(r.URL.RawQuery) > 0 {
+// 		target += "?" + r.URL.RawQuery
+// 	}
+// 	http.Redirect(w, r, target, http.StatusTemporaryRedirect)
+// }
 
 // notFound is used If the user tries to visit a host that can't be found.
 func notFound(w http.ResponseWriter, r *http.Request) {
