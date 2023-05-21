@@ -118,11 +118,17 @@ func forwardTLS(w http.ResponseWriter, r *http.Request) {
 	notFound(w, r)
 }
 
+// /forwardHTTP checks the host name, if TLS is enabled, it re-writes the
+// address and forwards the client to the the https website, other wise it
+// forwards it to the appropriate service
 func forwardHTTP(w http.ResponseWriter, r *http.Request) {
 	if host, ok := proxyMap[r.Host]; ok {
 		if proxyMap[r.Host].TLSEnabled {
-			// tlsRedirect(w, r)
-			forwardTLS(w, r)
+			target := "https://" + r.Host + r.URL.Path
+			if len(r.URL.RawQuery) > 0 {
+				target += "?" + r.URL.RawQuery
+			}
+			http.Redirect(w, r, target, http.StatusTemporaryRedirect)
 			return
 		}
 		host.ReverseProxy.ServeHTTP(w, r)
