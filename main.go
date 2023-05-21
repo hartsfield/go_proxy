@@ -74,7 +74,6 @@ func main() {
 	}
 	defer f.Close()
 	log.SetOutput(f)
-	log.Println("test")
 
 	insecure := newServerConf(httpPort, http.HandlerFunc(forwardHTTP))
 	secure := newServerConf(tlsPort, http.HandlerFunc(forwardTLS))
