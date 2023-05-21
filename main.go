@@ -7,7 +7,6 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
-	"time"
 )
 
 // PROX
@@ -78,78 +77,6 @@ func main() {
 	go startTLSServer(secure)
 
 	<-ctx.Done()
-}
-
-func newServerConf(port string, hf http.HandlerFunc) *http.Server {
-	return &http.Server{
-		Addr:              ":" + port,
-		Handler:           hf,
-		ReadHeaderTimeout: 5 * time.Second,
-		WriteTimeout:      10 * time.Second,
-		IdleTimeout:       5 * time.Second,
-	}
-}
-
-func startHTTPServer(s *http.Server) {
-	err := s.ListenAndServe()
-	if err != nil {
-		log.Println(err)
-	}
-	globalHalt()
-}
-
-func startTLSServer(s *http.Server) {
-	err := s.ListenAndServeTLS(certs.Fullchain, certs.Privkey)
-	if err != nil {
-		log.Println(err)
-	}
-	globalHalt()
-}
-
-func forwardTLS(w http.ResponseWriter, r *http.Request) {
-	if host, ok := proxyMap[r.Host]; ok {
-		if proxyMap[r.Host].TLSEnabled {
-			host.ReverseProxy.ServeHTTP(w, r)
-			return
-		}
-		forwardHTTP(w, r)
-		return
-	}
-	notFound(w, r)
-}
-
-// /forwardHTTP checks the host name, if TLS is enabled, it re-writes the
-// address and forwards the client to the the https website, other wise it
-// forwards it to the appropriate service
-func forwardHTTP(w http.ResponseWriter, r *http.Request) {
-	if host, ok := proxyMap[r.Host]; ok {
-		if proxyMap[r.Host].TLSEnabled {
-			target := "https://" + r.Host + r.URL.Path
-			if len(r.URL.RawQuery) > 0 {
-				target += "?" + r.URL.RawQuery
-			}
-			http.Redirect(w, r, target, http.StatusTemporaryRedirect)
-			return
-		}
-		host.ReverseProxy.ServeHTTP(w, r)
-		return
-	}
-	notFound(w, r)
-}
-
-// tlsRedirect is used to re-write the host name and redirect the user to
-// the secure website via https.
-// func tlsRedirect(w http.ResponseWriter, r *http.Request) {
-// 	target := "https://" + r.Host + r.URL.Path
-// 	if len(r.URL.RawQuery) > 0 {
-// 		target += "?" + r.URL.RawQuery
-// 	}
-// 	http.Redirect(w, r, target, http.StatusTemporaryRedirect)
-// }
-
-// notFound is used If the user tries to visit a host that can't be found.
-func notFound(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("coming soon"))
 }
 
 // makeProxy takes var #SERVICE *service{} and creates a *http.ReverseProxy
