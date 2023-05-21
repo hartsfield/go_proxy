@@ -35,7 +35,7 @@ func startTLSServer(s *http.Server) {
 func forwardTLS(w http.ResponseWriter, r *http.Request) {
 	if host, ok := proxyMap[r.Host]; ok {
 		if proxyMap[r.Host].TLSEnabled {
-			log.Println(r.URL.String())
+			log.Println(r.RemoteAddr, r.URL.String())
 			host.ReverseProxy.ServeHTTP(w, r)
 			return
 		}
@@ -58,7 +58,7 @@ func forwardHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, target, http.StatusTemporaryRedirect)
 			return
 		}
-		log.Println(r.URL.String())
+		log.Println(r.RemoteAddr, r.URL.Host, r.URL.String())
 		host.ReverseProxy.ServeHTTP(w, r)
 		return
 	}
@@ -67,6 +67,6 @@ func forwardHTTP(w http.ResponseWriter, r *http.Request) {
 
 // notFound is used If the user tries to visit a host that can't be found.
 func notFound(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL.String())
+	log.Println(r.RemoteAddr, r.URL.String())
 	w.Write([]byte("coming soon"))
 }
