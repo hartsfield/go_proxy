@@ -58,7 +58,7 @@ func forwardHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, target, http.StatusTemporaryRedirect)
 			return
 		}
-		log.Println(r.RemoteAddr, r.Host, r.URL.String())
+		log.Println(r.RemoteAddr, "host: ", r.Host, r.URL.String())
 		host.ReverseProxy.ServeHTTP(w, r)
 		return
 	}
