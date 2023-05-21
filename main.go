@@ -64,11 +64,11 @@ var (
 	tlsPort  string              = os.Getenv("prox443")
 	confPath string              = os.Getenv("proxConf")
 	proxyMap map[string]*service = make(map[string]*service)
-	f        *os.File
+	// f        *os.File
 )
 
 func main() {
-	f, err = os.OpenFile("testlogfile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	f, err := os.OpenFile("testlogfile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
