@@ -40,33 +40,6 @@ import (
 // NOTE: After renewing certs, mv them to ~/tlsCerts and chown -R USER ~/tlsCerts/*
 // NOTE: Make sure these files have the correct permissions, you likely copied
 // them from root.
-
-type tlsCerts struct {
-	Privkey   string
-	Fullchain string
-}
-
-type service struct {
-	Port         string
-	TLSEnabled   bool
-	AlertsOn     bool
-	DomainName   string
-	ReverseProxy *httputil.ReverseProxy
-}
-
-var (
-	globalHalt context.CancelFunc
-	certs      *tlsCerts = &tlsCerts{
-		Privkey:   os.Getenv("privkey"),
-		Fullchain: os.Getenv("fullchain"),
-	}
-	httpPort string              = os.Getenv("prox80")
-	tlsPort  string              = os.Getenv("prox443")
-	confPath string              = os.Getenv("proxConf")
-	proxyMap map[string]*service = make(map[string]*service)
-	// f        *os.File
-)
-
 func main() {
 	f, err := os.OpenFile("testlogfile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {

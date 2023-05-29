@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+// newServerConf returns a new server configuration, and is used when
+// instantiating the servers that intercept HTTP/S traffic.
 func newServerConf(port string, hf http.HandlerFunc) *http.Server {
 	return &http.Server{
 		Addr:              ":" + port,
@@ -16,22 +18,33 @@ func newServerConf(port string, hf http.HandlerFunc) *http.Server {
 	}
 }
 
+// startHTTPServer is used to start the HTTP server
 func startHTTPServer(s *http.Server) {
 	err := s.ListenAndServe()
 	if err != nil {
 		log.Println(err)
 	}
+	// if the server encounters an error, this function will be called to
+	// halt the server.
 	globalHalt()
 }
 
+// startTLSServer is used to start the TLS server
 func startTLSServer(s *http.Server) {
 	err := s.ListenAndServeTLS(certs.Fullchain, certs.Privkey)
 	if err != nil {
 		log.Println(err)
 	}
+	// if the server encounters an error, this function will be called to
+	// halt the server.
 	globalHalt()
 }
 
+// forwardTLS is the handler used for requests on the secure port (TLS/HTTPS).
+// forwardTLS will check if a host exists and has TLS enabled, if both are
+// true, it serves the website, if the host exists, but doesn't have TLS
+// enabled, it forwarss it to the HTTP server, otherwise it sends the client to
+// the 'not found' page.
 func forwardTLS(w http.ResponseWriter, r *http.Request) {
 	if host, ok := proxyMap[r.Host]; ok {
 		if proxyMap[r.Host].TLSEnabled {
