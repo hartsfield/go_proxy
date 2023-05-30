@@ -1,9 +1,9 @@
 #!/bin/bash
-privkey=~/tlsCerts/privkey.pem
-fullchain=~/tlsCerts/fullchain.pem
-prox80=8080
-prox443=8443
-proxConf=prox.config
+export privkey=~/tlsCerts/privkey.pem
+export fullchain=~/tlsCerts/fullchain.pem
+export prox80=8080
+export prox443=8443
+export proxConf=prox.config
 trap -- '' SIGTERM
 git pull
 go build -o go_proxy
