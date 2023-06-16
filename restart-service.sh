@@ -1,6 +1,6 @@
 #!/bin/bash
-export privkey=~/tlsCerts/privkey
-export fullchain=~/tlsCerts/fullchain
+export privkey=~/tlsCerts/privkey.pem
+export fullchain=~/tlsCerts/fullchain.pem
 export prox80=8080
 export prox443=8443
 export proxConf=~/prox.conf
