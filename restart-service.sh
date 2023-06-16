@@ -1,5 +1,5 @@
 #!/bin/bash
-export PWD=~/go_proxy
+cd ~/go_proxy
 export privkey=~/tlsCerts/privkey.pem
 export fullchain=~/tlsCerts/fullchain.pem
 export prox80=8080
