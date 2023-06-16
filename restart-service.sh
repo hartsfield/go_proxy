@@ -8,6 +8,5 @@ export proxConf=~/prox.conf
 git pull
 go build -o go_proxy
 pkill -f go_proxy
-./go_proxy
-# nohup ./go_proxy > /dev/null & disown
+nohup ./go_proxy > /dev/null & disown
 # sleep 2
