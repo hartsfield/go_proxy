@@ -18,7 +18,8 @@ redirect traffic from port `80` and `443` respectively:
     sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
 
 When starting the server, tell goprox where your private key and fullchain 
-files are by specifying the `fullchain` and `privkey` environment variables at 
-runtime:
+files are by specifying the `fullchain` and `privkey`, the ports you forwarded 
+to port 80 and 443, and the location the `prox.config`, as environment variables 
+at runtime:
 
-    fullchain=/path/to/fullchain.pem privkey=/path/to/privkey.pem ./goprox &
+    prox80=8080 prox443=8443 proxConf=prox.config privkey=~/tlsCerts/privkey.pem fullchain=~/tlsCerts/fullchain.pem prox
