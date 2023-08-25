@@ -60,6 +60,13 @@ func main() {
 	<-ctx.Done()
 }
 
+type MyRoundTripper struct{}
+
+func (t *MyRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header["X-Forwarded-For"] = []string{req.RemoteAddr}
+	return http.DefaultTransport.RoundTrip(req)
+}
+
 // makeProxy takes var #SERVICE *service{} and creates a *http.ReverseProxy
 // using the properties of #SERVICE
 func makeProxy(s *service) *service {
@@ -75,6 +82,7 @@ func makeProxy(s *service) *service {
 			req.URL.Scheme = "http"
 		},
 		FlushInterval: -1,
+		Transport:     &MyRoundTripper{},
 	}
 	return s
 }
