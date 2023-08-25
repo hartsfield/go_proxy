@@ -63,7 +63,7 @@ func main() {
 type MyRoundTripper struct{}
 
 func (t *MyRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header["X-Forwarded-For"] = []string{"1.2.3.4"}
+	req.Header["X-Forwarded-For"] = []string{req.RemoteAddr}
 	return http.DefaultTransport.RoundTrip(req)
 }
 
@@ -81,7 +81,7 @@ func makeProxy(s *service) *service {
 			req.URL.Host = u.Host
 			req.URL.Scheme = "http"
 		},
-		FlushInterval: -1,
+		FlushInterval: 0,
 		Transport:     &MyRoundTripper{},
 	}
 	return s
