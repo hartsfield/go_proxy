@@ -68,7 +68,7 @@ func forwardHTTP(w http.ResponseWriter, r *http.Request) {
 		if proxyMap[r.Host].TLSEnabled {
 			rHost := r.Host
 			if r.Host[0:4] == "www." {
-				rHost = rHost[5:]
+				rHost = rHost[4:]
 			}
 
 			fmt.Println(rHost)
