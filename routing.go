@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -64,7 +65,12 @@ func forwardTLS(w http.ResponseWriter, r *http.Request) {
 func forwardHTTP(w http.ResponseWriter, r *http.Request) {
 	if host, ok := proxyMap[r.Host]; ok {
 		if proxyMap[r.Host].TLSEnabled {
-			target := "https://" + r.Host + r.URL.Path
+			rHost := r.Host
+			if r.Host[0:3] == "www." {
+				rHost = rHost[4:]
+			}
+			fmt.Println(rHost)
+			target := "https://" + rHost + r.URL.Path
 			if len(r.URL.RawQuery) > 0 {
 				target += "?" + r.URL.RawQuery
 			}
