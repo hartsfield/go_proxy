@@ -76,7 +76,6 @@ func makeProxy(s *service) *service {
 	}
 	s.ReverseProxy = &httputil.ReverseProxy{
 		Director: func(req *http.Request) {
-			log.Println(req.Host, u.Host)
 			req.Header.Add("X-Forwarded-Host", req.Host)
 			req.Header.Add("X-Origin-Host", u.Host)
 			req.URL.Host = u.Host
