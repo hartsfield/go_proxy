@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -77,7 +76,7 @@ func makeProxy(s *service) *service {
 	}
 	s.ReverseProxy = &httputil.ReverseProxy{
 		Director: func(req *http.Request) {
-			fmt.Println(req.Host)
+			log.Println(req.Host)
 			req.Header.Add("X-Forwarded-Host", req.Host)
 			req.Header.Add("X-Origin-Host", u.Host)
 			req.URL.Host = u.Host
