@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"context"
-	"fmt"
 	"log"
 	"net/http/httputil"
 	"os"
@@ -73,9 +72,7 @@ func init() {
 			s.AlertsOn = true
 		}
 
-		fmt.Println(s.DomainName)
 		proxyMap[s.DomainName] = makeProxy(s)
-		proxyMap["http://www."+s.DomainName] = proxyMap[s.DomainName]
 	}
 
 	if err := scanner.Err(); err != nil {
