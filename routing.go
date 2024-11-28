@@ -69,6 +69,10 @@ func forwardHTTP(w http.ResponseWriter, r *http.Request) {
 			if r.Host[0:3] == "www." {
 				rHost = rHost[4:]
 			}
+			if r.Host[0:10] == "http://www." {
+				rHost = rHost[11:]
+			}
+
 			fmt.Println(rHost)
 			target := "https://" + rHost + r.URL.Path
 			if len(r.URL.RawQuery) > 0 {
