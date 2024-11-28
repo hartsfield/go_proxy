@@ -79,7 +79,7 @@ func makeProxy(s *service) *service {
 			req.Header.Add("X-Forwarded-Host", req.Host)
 			req.Header.Add("X-Origin-Host", u.Host)
 			req.URL.Host = u.Host
-			req.URL.Scheme = "http"
+			req.URL.Scheme = "https"
 		},
 		FlushInterval: 0,
 		// FlushInterval: -1,
