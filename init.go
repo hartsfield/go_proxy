@@ -75,7 +75,7 @@ func init() {
 
 		fmt.Println(s.DomainName)
 		proxyMap[s.DomainName] = makeProxy(s)
-		proxyMap["www."+s.DomainName] = proxyMap[s.DomainName]
+		proxyMap["http://www."+s.DomainName] = proxyMap[s.DomainName]
 	}
 
 	if err := scanner.Err(); err != nil {
