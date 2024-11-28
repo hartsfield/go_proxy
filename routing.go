@@ -63,7 +63,7 @@ func forwardTLS(w http.ResponseWriter, r *http.Request) {
 // re-writes the address and forwards the client to the the https website,
 // other wise it forwards it to the appropriate service
 func forwardHTTP(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.Host)
+	log.Println(r.Host)
 	if host, ok := proxyMap[r.Host]; ok {
 		if proxyMap[r.Host].TLSEnabled {
 			rHost := r.Host
