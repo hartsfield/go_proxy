@@ -63,6 +63,7 @@ func main() {
 type MyRoundTripper struct{}
 
 func (t *MyRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	log.Println([]string{req.RemoteAddr})
 	req.Header["X-Forwarded-For"] = []string{req.RemoteAddr}
 	return http.DefaultTransport.RoundTrip(req)
 }
