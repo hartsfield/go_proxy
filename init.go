@@ -58,10 +58,10 @@ type gcloud struct {
 
 var (
 	globalHalt context.CancelFunc
-	fullchain  string = pc.CertDir + pc.TlsCerts.Fullchain
-	privkey    string = pc.CertDir + pc.TlsCerts.Privkey
-	httpPort   string = pc.HttpPort
-	tlsPort    string = pc.TLSPort
+	fullchain  string
+	privkey    string
+	httpPort   string
+	tlsPort    string
 	confPath   string = os.Getenv("proxConfPath")
 	pc         config = config{}
 )
@@ -73,6 +73,11 @@ func init() {
 	pc.Services = make(map[string]*serviceConf)
 	proxyConf()
 	scan()
+	fullchain = pc.CertDir + pc.TlsCerts.Fullchain
+	privkey = pc.CertDir + pc.TlsCerts.Privkey
+	httpPort = pc.HttpPort
+	tlsPort = pc.TLSPort
+
 }
 
 func scan() {
