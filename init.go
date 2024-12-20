@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http/httputil"
 	"os"
@@ -77,7 +78,6 @@ func init() {
 	privkey = pc.CertDir + pc.TlsCerts.Privkey
 	httpPort = pc.HttpPort
 	tlsPort = pc.TLSPort
-
 }
 
 func scan() {
@@ -86,6 +86,7 @@ func scan() {
 		log.Println(err)
 	}
 	for _, d := range dir {
+		fmt.Println(d)
 		b, err := os.ReadFile(pc.LiveDir + d.Name() + "/bolt.conf.json")
 		if err != nil {
 			log.Println(err)
