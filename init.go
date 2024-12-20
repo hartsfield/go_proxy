@@ -58,28 +58,12 @@ type gcloud struct {
 }
 
 var (
-	// globalHalt is used to safely shutdown the server int he event of an
-	// error
 	globalHalt context.CancelFunc
-	// certs is used for the TLS server
-	certs *tlsCerts = &tlsCerts{
-		Privkey:   os.Getenv("privkey"),
-		Fullchain: os.Getenv("fullchain"),
-	}
-	// httpPort is the port your server recieves http traffic on (port 80
-	// not recommended)
-	httpPort string = os.Getenv("prox80")
-	// tlsPort is the port your server recieves https traffic on (port 443
-	// not recommended)
-	tlsPort string = os.Getenv("prox443")
-	// confPath is the path to this programs configuraton file
-	confPath      string = os.Getenv("proxConf")
-	proxyConfPath string = os.Getenv("proxConfPath")
-	// proxyMap is a map of host names to services running on the server.
-	proxyMap map[string]serviceConf = make(map[string]serviceConf)
-
-	// fMap map[string]*stringFlag = make(map[string]*stringFlag)
-	pc *config = &config{}
+	certs      *tlsCerts = &pc.TlsCerts
+	httpPort   string    = pc.HttpPort
+	tlsPort    string    = pc.TLSPort
+	confPath   string    = os.Getenv("proxConfPath")
+	pc         *config   = &config{}
 )
 
 // type stringFlag struct {
@@ -103,14 +87,6 @@ var (
 func init() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	pc.Services = make(map[string]*serviceConf)
-
-	// fMap["scan"] = &stringFlag{do: scan}
-	// flag.Var(fMap["scan"], "deploy", "Deploys project to server")
-
-	if len(confPath) < 1 {
-		confPath = "/home/john/prox.conf"
-	}
-
 	proxyConf()
 	scan()
 }
@@ -137,10 +113,10 @@ func scan() {
 }
 
 func proxyConf() {
-	if len(proxyConfPath) < 1 {
-		proxyConfPath = "/home/john/go_proxy/prox.conf"
+	if len(confPath) < 1 {
+		confPath = "/home/john/go_proxy/prox.conf"
 	}
-	file, err := os.ReadFile(proxyConfPath)
+	file, err := os.ReadFile(confPath)
 	if err != nil {
 		log.Fatal(err)
 	}
