@@ -10,14 +10,6 @@ import (
 	"os"
 )
 
-// PROX
-//
-// prox80=http_port
-// prox443=https_port
-// proxConf=/path/to/configuraton
-// privkey=/path/to/privkey
-// fullchain=/path/to/fullchain
-//
 // ex.
 //
 // prox80=8080 prox443=8443 proxConf=prox.config privkey=~/tlsCerts/privkey.pem fullchain=~/tlsCerts/fullchain.pem prox

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http/httputil"
 	"os"
@@ -63,24 +62,8 @@ var (
 	httpPort   string    = pc.HttpPort
 	tlsPort    string    = pc.TLSPort
 	confPath   string    = os.Getenv("proxConfPath")
-	pc         *config   = &config{}
+	pc         config    = config{}
 )
-
-// type stringFlag struct {
-// 	set   bool
-// 	value string
-// 	do    func()
-// }
-
-// func (sf *stringFlag) Set(x string) error {
-// 	sf.value = x
-// 	sf.set = true
-// 	return nil
-// }
-
-// func (sf *stringFlag) String() string {
-// 	return sf.value
-// }
 
 // init sets flags that tell log to log the date and line number. Init also
 // reads the configuration file
@@ -121,9 +104,7 @@ func proxyConf() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(string(file))
-
-	err = json.Unmarshal(file, pc)
+	err = json.Unmarshal(file, &pc)
 	if err != nil {
 		log.Println(err)
 	}
