@@ -11,14 +11,14 @@ import (
 
 // config is the configuration file for bolt-proxy
 type config struct {
-	ProxyDir     string                  `json:"proxy_dir"`
-	AdminUser    string                  `json:"admin_user"`
-	LiveDir      string                  `json:"live_dir"`
-	StageDir     string                  `json:"stage_dir"`
-	CertDir      string                  `json:"cert_dir"`
-	TlsCerts     tlsCerts                `json:"tls_certs"`
-	ServiceRepos []string                `json:"service_repos"`
-	Services     map[string]*serviceConf `json:"services"`
+	ProxyDir     string                 `json:"proxy_dir"`
+	AdminUser    string                 `json:"admin_user"`
+	LiveDir      string                 `json:"live_dir"`
+	StageDir     string                 `json:"stage_dir"`
+	CertDir      string                 `json:"cert_dir"`
+	TlsCerts     tlsCerts               `json:"tls_certs"`
+	ServiceRepos []string               `json:"service_repos"`
+	Services     map[string]serviceConf `json:"services"`
 }
 
 // tlsCerts are used for the tls server
@@ -74,7 +74,7 @@ var (
 	confPath      string = os.Getenv("proxConf")
 	proxyConfPath string = os.Getenv("proxConfPath")
 	// proxyMap is a map of host names to services running on the server.
-	proxyMap map[string]*serviceConf = make(map[string]*serviceConf)
+	proxyMap map[string]serviceConf = make(map[string]serviceConf)
 
 	// fMap map[string]*stringFlag = make(map[string]*stringFlag)
 	pc *config
@@ -128,7 +128,7 @@ func scan() {
 			log.Println(err)
 		}
 
-		pc.Services[sc.App.DomainName] = makeProxy(&sc)
+		pc.Services[sc.App.DomainName] = makeProxy(sc)
 		pc.Services["www."+sc.App.DomainName] = pc.Services[sc.App.DomainName]
 	}
 }

@@ -69,7 +69,7 @@ func (t *MyRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 
 // makeProxy takes var #SERVICE *service{} and creates a *http.ReverseProxy
 // using the properties of #SERVICE
-func makeProxy(s *serviceConf) *serviceConf {
+func makeProxy(s serviceConf) serviceConf {
 	u, err := url.Parse("http://localhost:" + s.App.Port + "/")
 	if err != nil {
 		log.Println(err)
