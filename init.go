@@ -21,6 +21,14 @@ type config struct {
 	Services     map[string]serviceConf
 }
 
+// type confi struct {
+// 	ProxyDir  string `json:"proxy_dir"`
+// 	AdminUser string `json:"admin_user"`
+// 	LiveDir   string `json:"live_dir"`
+// 	StageDir  string `json:"stage_dir"`
+// 	CertDir   string `json:"cert_dir"`
+// }
+
 // tlsCerts are used for the tls server
 type tlsCerts struct {
 	Privkey   string `json:"privkey"`
@@ -77,7 +85,7 @@ var (
 	proxyMap map[string]serviceConf = make(map[string]serviceConf)
 
 	// fMap map[string]*stringFlag = make(map[string]*stringFlag)
-	pc *config
+	pc *config = &config{}
 )
 
 // type stringFlag struct {
