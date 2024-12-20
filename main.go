@@ -8,6 +8,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"strings"
 )
 
 // ex.
@@ -51,8 +52,10 @@ func main() {
 	go startTLSServer(secure)
 
 	fmt.Println("Started services:")
-	for _, s := range pc.Services {
-		fmt.Println("  ->", s.App.Name)
+	for s := range pc.Services {
+		if !strings.Contains(s, "www.") {
+			fmt.Println("  ->", s)
+		}
 	}
 
 	<-ctx.Done()
