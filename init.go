@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"flag"
 	"log"
 	"net/http/httputil"
 	"os"
@@ -45,13 +46,38 @@ var (
 	// proxyMap is a map of host names to services running on the server.
 	proxyMap map[string]*service = make(map[string]*service)
 	// f        *os.File
+
+	fMap map[string]*stringFlag = make(map[string]*stringFlag)
 )
+
+type stringFlag struct {
+	set   bool
+	value string
+	do    func()
+}
+
+func (sf *stringFlag) Set(x string) error {
+	sf.value = x
+	sf.set = true
+	return nil
+}
+
+func (sf *stringFlag) String() string {
+	return sf.value
+}
 
 // init sets flags that tell log to log the date and line number. Init also
 // reads the configuration file
 func init() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
+	fMap["reconf"] = &stringFlag{do: conf}
+	flag.Var(fMap["reconf"], "deploy", "Deploys project to server")
+
+	conf()
+}
+
+func conf() {
 	file, err := os.Open(confPath)
 	if err != nil {
 		log.Fatal(err)
