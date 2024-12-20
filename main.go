@@ -45,16 +45,13 @@ func main() {
 	}
 	go func() {
 		for {
-			_, remoteaddr, err := ser.ReadFromUDP(p)
-			fmt.Printf("Read a message from %v %s \n", remoteaddr, p)
-			fmt.Println(string(p)[:4])
-			if string(p)[:4] == "quit" {
-				fmt.Println(string(p))
-				os.Exit(0)
+			_, _, err := ser.ReadFromUDP(p)
+			if string(p)[:6] == "reload" {
+				scan()
 			}
 
 			if err != nil {
-				fmt.Printf("Some error  %v", err)
+				fmt.Println(err)
 				continue
 			}
 		}
