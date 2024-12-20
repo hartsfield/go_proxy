@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -31,6 +32,7 @@ func startHTTPServer(s *http.Server) {
 
 // startTLSServer is used to start the TLS server
 func startTLSServer(s *http.Server) {
+	fmt.Println(fullchain, privkey)
 	err := s.ListenAndServeTLS(fullchain, privkey)
 	if err != nil {
 		log.Println(err)
