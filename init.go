@@ -11,14 +11,14 @@ import (
 
 // config is the configuration file for bolt-proxy
 type config struct {
-	ProxyDir     string                 `json:"proxy_dir"`
-	AdminUser    string                 `json:"admin_user"`
-	LiveDir      string                 `json:"live_dir"`
-	StageDir     string                 `json:"stage_dir"`
-	CertDir      string                 `json:"cert_dir"`
-	TlsCerts     tlsCerts               `json:"tls_certs"`
-	ServiceRepos []string               `json:"service_repos"`
-	Services     map[string]serviceConf `json:"services"`
+	ProxyDir     string `json:"proxy_dir"`
+	AdminUser    string `json:"admin_user"`
+	LiveDir      string `json:"live_dir"`
+	StageDir     string `json:"stage_dir"`
+	CertDir      string `json:"cert_dir"`
+	ServiceRepos []string
+	TlsCerts     tlsCerts
+	Services     map[string]serviceConf
 }
 
 // tlsCerts are used for the tls server
