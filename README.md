@@ -1,5 +1,7 @@
 # go_proxy
 
+See: prox.conf
+
 This is a small program that acts as a proxy server for my websites. You can 
 point multiple hostnames at one IP address, and once configured, this proxy 
 will read the host name and direct the client to the appropriate port based on 
@@ -16,10 +18,3 @@ redirect traffic from port `80` and `443` respectively:
 
     sudo iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 8443
     sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
-
-When starting the server, tell goprox where your private key and fullchain 
-files are by specifying the `fullchain` and `privkey`, the ports you forwarded 
-to port 80 and 443, and the location the `prox.config`, as environment variables 
-at runtime:
-
-    prox80=8080 prox443=8443 proxConf=prox.config privkey=~/tlsCerts/privkey.pem fullchain=~/tlsCerts/fullchain.pem prox
