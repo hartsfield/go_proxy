@@ -41,7 +41,7 @@ type app struct {
 	Version    string `json:"version"`
 	Env        env    `json:"env"`
 	Port       string `json:"port"`
-	AlertsOn   string `json:"alertsOn"`
+	AlertsOn   bool   `json:"alertsOn"`
 	DomainName string `json:"domain_name"`
 	TLSEnabled bool   `json:"tls_enabled"`
 }
