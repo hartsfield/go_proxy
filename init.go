@@ -74,6 +74,10 @@ func init() {
 	fMap["reconf"] = &stringFlag{do: conf}
 	flag.Var(fMap["reconf"], "deploy", "Deploys project to server")
 
+	if len(confPath) < 1 {
+		confPath = "~/go_proxy/prox.config"
+	}
+
 	conf()
 }
 
