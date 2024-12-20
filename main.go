@@ -48,6 +48,7 @@ func main() {
 			_, _, err := ser.ReadFromUDP(p)
 			if string(p)[:6] == "reload" {
 				scan()
+				fmt.Println("Reloaded Confs")
 			}
 
 			if err != nil {
