@@ -52,9 +52,9 @@ func main() {
 	go startTLSServer(secure)
 
 	fmt.Println("Started services:")
-	for s := range pc.Services {
+	for s, v := range pc.Services {
 		if !strings.Contains(s, "www.") {
-			fmt.Println("  ->", s)
+			fmt.Println("  ->", s, "\t", v.App.Port)
 		}
 	}
 
