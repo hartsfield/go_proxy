@@ -17,7 +17,7 @@ type config struct {
 	LiveDir      string                  `json:"live_dir"`
 	StageDir     string                  `json:"stage_dir"`
 	CertDir      string                  `json:"cert_dir"`
-	TlsCerts     tlsCerts                `json:"tls_certs"`
+	TlsCerts     *tlsCerts               `json:"tls_certs"`
 	ServiceRepos []string                `json:"service_repos"`
 	Services     map[string]*serviceConf `json:"services"`
 }
@@ -109,38 +109,3 @@ func proxyConf() {
 		log.Println(err)
 	}
 }
-
-// func conf() {
-// 	file, err := os.Open(confPath)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	defer file.Close()
-
-// 	scanner := bufio.NewScanner(file)
-// 	for scanner.Scan() {
-// 		sc := strings.Split(scanner.Text(), ":")
-// 		s := &serviceConf{
-// 			Port:       sc[0],
-// 			DomainName: sc[3],
-// 		}
-// 		if sc[1] == "true" {
-// 			s.TLSEnabled = true
-// 		}
-// 		if sc[2] == "true" {
-// 			s.AlertsOn = true
-// 		}
-
-// 		proxyMap[s.DomainName] = makeProxy(s)
-// 		proxyMap["www."+s.DomainName] = makeProxy(s)
-// 	}
-
-// 	if err := scanner.Err(); err != nil {
-// 		log.Panicln(err)
-// 	}
-
-// 	if certs.Fullchain == "" || certs.Privkey == "" {
-// 		certs.Fullchain = "~/tlsCerts/fullchain.pem"
-// 		certs.Privkey = "~/tlsCerts/privkey.pem"
-// 	}
-// }
