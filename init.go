@@ -11,7 +11,9 @@ import (
 
 // config is the configuration file for bolt-proxy
 type config struct {
-	ProxyDir     string                  `json:"proxy_dir"`
+	ProxyDir     string `json:"proxy_dir"`
+	Prox443      string
+	Prox80       string
 	AdminUser    string                  `json:"admin_user"`
 	LiveDir      string                  `json:"live_dir"`
 	StageDir     string                  `json:"stage_dir"`
