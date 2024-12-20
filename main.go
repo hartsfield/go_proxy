@@ -47,8 +47,8 @@ func main() {
 		for {
 			_, remoteaddr, err := ser.ReadFromUDP(p)
 			fmt.Printf("Read a message from %v %s \n", remoteaddr, p)
-			fmt.Println(string(p))
 			if string(p) == "quit" {
+				fmt.Println(string(p))
 				os.Exit(0)
 			}
 
