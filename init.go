@@ -10,12 +10,12 @@ import (
 
 // config is the configuration file for bolt-proxy
 type config struct {
+	ProxyDir     string                  `json:"proxy_dir"`
 	AdminUser    string                  `json:"admin_user"`
 	LiveDir      string                  `json:"live_dir"`
 	StageDir     string                  `json:"stage_dir"`
 	CertDir      string                  `json:"cert_dir"`
 	TlsCerts     tlsCerts                `json:"tls_certs"`
-	ProxyDir     string                  `json:"proxy_dir"`
 	ServiceRepos []string                `json:"service_repos"`
 	Services     map[string]*serviceConf `json:"services"`
 }
