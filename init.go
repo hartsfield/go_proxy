@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"flag"
 	"log"
 	"net/http/httputil"
 	"os"
@@ -11,13 +10,14 @@ import (
 
 // config is the configuration file for bolt-proxy
 type config struct {
-	AdminUser string                  `json:"admin_user"`
-	LiveDir   string                  `json:"live_dir"`
-	StageDir  string                  `json:"stage_dir"`
-	CertDir   string                  `json:"cert_dir"`
-	TlsCerts  tlsCerts                `json:"tls_certs"`
-	ProxyDir  string                  `json:"proxy_dir"`
-	Services  map[string]*serviceConf `json:"services"`
+	AdminUser    string                  `json:"admin_user"`
+	LiveDir      string                  `json:"live_dir"`
+	StageDir     string                  `json:"stage_dir"`
+	CertDir      string                  `json:"cert_dir"`
+	TlsCerts     tlsCerts                `json:"tls_certs"`
+	ProxyDir     string                  `json:"proxy_dir"`
+	ServiceRepos []string                `json:"service_repos"`
+	Services     map[string]*serviceConf `json:"services"`
 }
 
 // tlsCerts are used for the tls server
@@ -75,33 +75,33 @@ var (
 	// proxyMap is a map of host names to services running on the server.
 	proxyMap map[string]*serviceConf = make(map[string]*serviceConf)
 
-	fMap map[string]*stringFlag = make(map[string]*stringFlag)
-	pc   *config
+	// fMap map[string]*stringFlag = make(map[string]*stringFlag)
+	pc *config
 )
 
-type stringFlag struct {
-	set   bool
-	value string
-	do    func()
-}
+// type stringFlag struct {
+// 	set   bool
+// 	value string
+// 	do    func()
+// }
 
-func (sf *stringFlag) Set(x string) error {
-	sf.value = x
-	sf.set = true
-	return nil
-}
+// func (sf *stringFlag) Set(x string) error {
+// 	sf.value = x
+// 	sf.set = true
+// 	return nil
+// }
 
-func (sf *stringFlag) String() string {
-	return sf.value
-}
+// func (sf *stringFlag) String() string {
+// 	return sf.value
+// }
 
 // init sets flags that tell log to log the date and line number. Init also
 // reads the configuration file
 func init() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	fMap["scan"] = &stringFlag{do: scan}
-	flag.Var(fMap["reconf"], "deploy", "Deploys project to server")
+	// fMap["scan"] = &stringFlag{do: scan}
+	// flag.Var(fMap["scan"], "deploy", "Deploys project to server")
 
 	if len(confPath) < 1 {
 		confPath = "/home/john/prox.conf"
