@@ -51,12 +51,15 @@ func main() {
 	go startHTTPServer(insecure)
 	go startTLSServer(secure)
 
+	fmt.Println()
 	fmt.Println("Started services:")
+	fmt.Println()
 	for s, v := range pc.Services {
 		if !strings.Contains(s, "www.") {
 			fmt.Println("  ->", v.App.Port, s)
 		}
 	}
+	fmt.Println()
 
 	<-ctx.Done()
 }
