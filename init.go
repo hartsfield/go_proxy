@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http/httputil"
 	"os"
@@ -140,6 +141,8 @@ func proxyConf() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	fmt.Println(string(file))
 
 	err = json.Unmarshal(file, pc)
 	if err != nil {
