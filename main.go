@@ -50,7 +50,11 @@ func main() {
 	go startHTTPServer(insecure)
 	go startTLSServer(secure)
 
-	fmt.Println("test")
+	fmt.Println("Started services:")
+	for _, s := range pc.Services {
+		fmt.Println("  ->", s.App.Name)
+	}
+
 	<-ctx.Done()
 }
 
