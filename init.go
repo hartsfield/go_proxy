@@ -118,7 +118,7 @@ func scan() {
 		log.Println(err)
 	}
 	for _, d := range dir {
-		b, err := os.ReadFile(d.Name() + "/bolt.conf.json")
+		b, err := os.ReadFile(pc.LiveDir + d.Name() + "/bolt.conf.json")
 		if err != nil {
 			log.Println(err)
 		}
