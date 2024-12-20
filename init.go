@@ -1,29 +1,57 @@
 package main
 
 import (
-	"bufio"
 	"context"
+	"encoding/json"
 	"flag"
 	"log"
 	"net/http/httputil"
 	"os"
-	"strings"
 )
+
+// config is the configuration file for bolt-proxy
+type config struct {
+	AdminUser string                  `json:"admin_user"`
+	LiveDir   string                  `json:"live_dir"`
+	StageDir  string                  `json:"stage_dir"`
+	CertDir   string                  `json:"cert_dir"`
+	TlsCerts  tlsCerts                `json:"tls_certs"`
+	ProxyDir  string                  `json:"proxy_dir"`
+	Services  map[string]*serviceConf `json:"services"`
+}
 
 // tlsCerts are used for the tls server
 type tlsCerts struct {
-	Privkey   string
-	Fullchain string
+	Privkey   string `json:"privkey"`
+	Fullchain string `json:"fullchain"`
 }
 
-// service is a type of application running on a port
-type service struct {
-	// Port is the port on which the application is runnning
-	Port         string
-	DomainName   string
-	TLSEnabled   bool
-	AlertsOn     bool
+type env map[string]string
+
+// serviceConf is a type of application running on a port
+type serviceConf struct {
+	App          app    `json:"app"`
+	GCloud       gcloud `json:"gcloud"`
 	ReverseProxy *httputil.ReverseProxy
+}
+
+type app struct {
+	Name       string `json:"name"`
+	Version    string `json:"version"`
+	Env        env    `json:"env"`
+	Port       string `json:"port"`
+	AlertsOn   string `json:"alertsOn"`
+	DomainName string `json:"domain_name"`
+	TLSEnabled bool   `json:"tls_enabled"`
+}
+
+type gcloud struct {
+	Command   string `json:"command"`
+	Zone      string `json:"zone"`
+	Project   string `json:"project"`
+	User      string `json:"user"`
+	LiveDir   string `json:"livedir"`
+	ProxyConf string `json:"proxyConf"`
 }
 
 var (
@@ -42,12 +70,13 @@ var (
 	// not recommended)
 	tlsPort string = os.Getenv("prox443")
 	// confPath is the path to this programs configuraton file
-	confPath string = os.Getenv("proxConf")
+	confPath      string = os.Getenv("proxConf")
+	proxyConfPath string = os.Getenv("proxConfPath")
 	// proxyMap is a map of host names to services running on the server.
-	proxyMap map[string]*service = make(map[string]*service)
-	// f        *os.File
+	proxyMap map[string]*serviceConf = make(map[string]*serviceConf)
 
 	fMap map[string]*stringFlag = make(map[string]*stringFlag)
+	pc   *config
 )
 
 type stringFlag struct {
@@ -71,47 +100,81 @@ func (sf *stringFlag) String() string {
 func init() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	fMap["reconf"] = &stringFlag{do: conf}
+	fMap["scan"] = &stringFlag{do: scan}
 	flag.Var(fMap["reconf"], "deploy", "Deploys project to server")
 
 	if len(confPath) < 1 {
-		confPath = "/home/john/go_proxy/prox.config"
+		confPath = "/home/john/prox.conf"
 	}
 
-	conf()
+	proxyConf()
+	scan()
 }
 
-func conf() {
-	file, err := os.Open(confPath)
+func scan() {
+	dir, err := os.ReadDir(pc.LiveDir)
+	if err != nil {
+		log.Println(err)
+	}
+	for _, d := range dir {
+		b, err := os.ReadFile(d.Name() + "/bolt.conf.json")
+		if err != nil {
+			log.Println(err)
+		}
+		sc := serviceConf{}
+		err = json.Unmarshal(b, &sc)
+		if err != nil {
+			log.Println(err)
+		}
+
+		pc.Services[sc.App.DomainName] = makeProxy(&sc)
+		pc.Services["www."+sc.App.DomainName] = pc.Services[sc.App.DomainName]
+	}
+}
+
+func proxyConf() {
+	file, err := os.ReadFile(proxyConfPath)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		sc := strings.Split(scanner.Text(), ":")
-		s := &service{
-			Port:       sc[0],
-			DomainName: sc[3],
-		}
-		if sc[1] == "true" {
-			s.TLSEnabled = true
-		}
-		if sc[2] == "true" {
-			s.AlertsOn = true
-		}
-
-		proxyMap[s.DomainName] = makeProxy(s)
-		proxyMap["www."+s.DomainName] = makeProxy(s)
-	}
-
-	if err := scanner.Err(); err != nil {
-		log.Panicln(err)
-	}
-
-	if certs.Fullchain == "" || certs.Privkey == "" {
-		certs.Fullchain = "~/tlsCerts/fullchain.pem"
-		certs.Privkey = "~/tlsCerts/privkey.pem"
+	err = json.Unmarshal(file, pc)
+	if err != nil {
+		log.Println(err)
 	}
 }
+
+// func conf() {
+// 	file, err := os.Open(confPath)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	defer file.Close()
+
+// 	scanner := bufio.NewScanner(file)
+// 	for scanner.Scan() {
+// 		sc := strings.Split(scanner.Text(), ":")
+// 		s := &serviceConf{
+// 			Port:       sc[0],
+// 			DomainName: sc[3],
+// 		}
+// 		if sc[1] == "true" {
+// 			s.TLSEnabled = true
+// 		}
+// 		if sc[2] == "true" {
+// 			s.AlertsOn = true
+// 		}
+
+// 		proxyMap[s.DomainName] = makeProxy(s)
+// 		proxyMap["www."+s.DomainName] = makeProxy(s)
+// 	}
+
+// 	if err := scanner.Err(); err != nil {
+// 		log.Panicln(err)
+// 	}
+
+// 	if certs.Fullchain == "" || certs.Privkey == "" {
+// 		certs.Fullchain = "~/tlsCerts/fullchain.pem"
+// 		certs.Privkey = "~/tlsCerts/privkey.pem"
+// 	}
+// }

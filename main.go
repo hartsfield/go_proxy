@@ -41,7 +41,7 @@ import (
 // NOTE: Make sure these files have the correct permissions, you likely copied
 // them from root.
 func main() {
-	f, err := os.OpenFile("testlogfile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	f, err := os.OpenFile("logfile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
@@ -69,8 +69,8 @@ func (t *MyRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 
 // makeProxy takes var #SERVICE *service{} and creates a *http.ReverseProxy
 // using the properties of #SERVICE
-func makeProxy(s *service) *service {
-	u, err := url.Parse("http://localhost:" + s.Port + "/")
+func makeProxy(s *serviceConf) *serviceConf {
+	u, err := url.Parse("http://localhost:" + s.App.Port + "/")
 	if err != nil {
 		log.Println(err)
 	}
