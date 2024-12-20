@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -57,6 +58,7 @@ func main() {
 	go startHTTPServer(insecure)
 	go startTLSServer(secure)
 
+	fmt.Println("test")
 	<-ctx.Done()
 }
 
