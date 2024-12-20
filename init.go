@@ -58,7 +58,7 @@ type gcloud struct {
 
 var (
 	globalHalt context.CancelFunc
-	certs      *tlsCerts = &pc.TlsCerts
+	certs      *tlsCerts = pc.TlsCerts
 	httpPort   string    = pc.HttpPort
 	tlsPort    string    = pc.TLSPort
 	confPath   string    = os.Getenv("proxConfPath")
