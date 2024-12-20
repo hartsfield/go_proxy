@@ -58,11 +58,12 @@ type gcloud struct {
 
 var (
 	globalHalt context.CancelFunc
-	certs      *tlsCerts = pc.TlsCerts
-	httpPort   string    = pc.HttpPort
-	tlsPort    string    = pc.TLSPort
-	confPath   string    = os.Getenv("proxConfPath")
-	pc         config    = config{}
+	fullchain  string = pc.CertDir + pc.TlsCerts.Fullchain
+	privkey    string = pc.CertDir + pc.TlsCerts.Privkey
+	httpPort   string = pc.HttpPort
+	tlsPort    string = pc.TLSPort
+	confPath   string = os.Getenv("proxConfPath")
+	pc         config = config{}
 )
 
 // init sets flags that tell log to log the date and line number. Init also

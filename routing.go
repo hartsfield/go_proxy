@@ -31,7 +31,7 @@ func startHTTPServer(s *http.Server) {
 
 // startTLSServer is used to start the TLS server
 func startTLSServer(s *http.Server) {
-	err := s.ListenAndServeTLS(certs.Fullchain, certs.Privkey)
+	err := s.ListenAndServeTLS(fullchain, privkey)
 	if err != nil {
 		log.Println(err)
 	}
