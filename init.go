@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http/httputil"
 	"os"
-	"os/user"
 	"strings"
 )
 
@@ -74,13 +73,9 @@ func init() {
 
 	fMap["reconf"] = &stringFlag{do: conf}
 	flag.Var(fMap["reconf"], "deploy", "Deploys project to server")
-	u, err := user.Current()
-	if err != nil {
-		log.Println(err)
-	}
 
 	if len(confPath) < 1 {
-		confPath = "/home/" + u.Name + "/go_proxy/prox.config"
+		confPath = "/home/john/go_proxy/prox.config"
 	}
 
 	conf()
