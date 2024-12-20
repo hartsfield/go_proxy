@@ -54,7 +54,7 @@ func main() {
 	fmt.Println("Started services:")
 	for s, v := range pc.Services {
 		if !strings.Contains(s, "www.") {
-			fmt.Println("  ->", s, "\t", v.App.Port)
+			fmt.Println("  ->", v.App.Port, s)
 		}
 	}
 
