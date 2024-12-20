@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -11,15 +12,6 @@ import (
 	"strings"
 )
 
-// ex.
-//
-// prox80=8080 prox443=8443 proxConf=prox.config privkey=~/tlsCerts/privkey.pem fullchain=~/tlsCerts/fullchain.pem prox
-//
-// It is advised to forward traffic on port :80 (HTTP) and :443 (HTTPS/TLS) to
-// higher ports which dont require administrator privileges. By default prox
-// runs on port :8080 for HTTP, and port :8443 for HTTPS traffic.You can change
-// these defaults by run with different environment variables.
-//
 // When restarting the server, you can use iptables to redirect traffic from
 // port :443 to port :8443, and from port :80 to port :8080, or whatever your
 // desired prts may be. The following commands should achieve this on most
@@ -41,6 +33,26 @@ func main() {
 	}
 	defer f.Close()
 	log.SetOutput(f)
+	p := make([]byte, 2048)
+	addr := net.UDPAddr{
+		Port: 9213,
+		IP:   net.ParseIP("127.0.0.1"),
+	}
+	ser, err := net.ListenUDP("udp", &addr)
+	if err != nil {
+		fmt.Printf("Some error %v\n", err)
+		return
+	}
+	go func() {
+		for {
+			_, remoteaddr, err := ser.ReadFromUDP(p)
+			fmt.Printf("Read a message from %v %s \n", remoteaddr, p)
+			if err != nil {
+				fmt.Printf("Some error  %v", err)
+				continue
+			}
+		}
+	}()
 
 	insecure := newServerConf(httpPort, http.HandlerFunc(forwardHTTP))
 	secure := newServerConf(tlsPort, http.HandlerFunc(forwardTLS))
